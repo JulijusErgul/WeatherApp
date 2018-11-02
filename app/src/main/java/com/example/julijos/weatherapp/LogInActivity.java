@@ -1,7 +1,15 @@
 package com.example.julijos.weatherapp;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,12 +25,20 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthEmailException;
 
+
+
 public class LogInActivity extends AppCompatActivity implements View.OnClickListener {
 
 
     EditText loginEmail, loginPassword;
     ProgressBar progressBar;
     private FirebaseAuth mAuth;
+
+    LocationManager locationManager;
+    LocationListener locationListener;
+
+    double longitude, latitude;
+    String strLong, strLat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +53,46 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.textViewNotMember).setOnClickListener(this);
 
         mAuth = FirebaseAuth.getInstance();
+
+
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
+                //Toast.makeText(getApplicationContext(), String.valueOf(latitude)+ String.valueOf(longitude), Toast.LENGTH_LONG).show();
+                Log.i("GPS-Coordinates", "Lat: " + String.valueOf(latitude) + ", Long: " + String.valueOf(longitude));
+                strLat = String.valueOf(latitude);
+                strLong = String.valueOf(longitude);
+                // Log.i("Coordinates: ", strLat+", "+strLong);
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+
+            }
+        };
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED){
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
+
+        }
+        else{
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 100, locationListener);
+        }
 
     }
 
@@ -79,6 +135,8 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                     //startActivity(new Intent(this, MainActivity.class));
                     Intent intent = new Intent(LogInActivity.this, MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//to not come back to loginActivity when back is tapped
+                    intent.putExtra("Latitude", strLat);
+                    intent.putExtra("Longitude", strLong);
                     startActivity(intent);
                 }else{
                     if(task.getException() instanceof FirebaseAuthEmailException){

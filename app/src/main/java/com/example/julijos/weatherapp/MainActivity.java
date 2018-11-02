@@ -27,6 +27,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -68,11 +73,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     String changeCityName ="";
 
-    LocationManager locationManager;
-    LocationListener locationListener;
-
-    double longitude, latitude;
-    String strLong, strLat;
+    String latitude="", longitude="";
 
     String icon = "";
     String desc = "";
@@ -80,21 +81,14 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
     double tempCelsius;
 
     ArrayList<String> prevCities = new ArrayList<String>();
-
     Map<String, String> prevCityToDB = new HashMap<String,String>();
 
     FirebaseFirestore firebaseFirestoreDB = FirebaseFirestore.getInstance();
 
+    FirebaseDatabase database  =FirebaseDatabase.getInstance();
+    DatabaseReference databaseReference = database.getReference("Message");
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)== PackageManager.PERMISSION_GRANTED)
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 100, locationListener);
-
-    }
 
     @Override
     public void applyText(String cityName) {
@@ -103,12 +97,14 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
         prevCities.add(changeCityName);
         //Replace non-acceptable charachters
-        prevCityToDB.put("City name", changeCityName);
+        databaseReference.setValue(changeCityName);
+        Log.i("UPLOAD TO DATABASE", "databaseReference  " + changeCityName);
+        //prevCityToDB.put("City name", changeCityName);
         changeCityName = changeCityName.replaceAll(" ", "+");
         changeCityName = changeCityName.replaceAll("ö", "o");
         changeCityName = changeCityName.replaceAll("ä","a");
         changeCity();
-        uploadToDB();
+        //uploadToDB();
 
     }
 
@@ -156,6 +152,8 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
             }
 
 
+
+
         }
 
 
@@ -188,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                     textViewCity.setText(cityName);
                     textViewDesc.setText(desc);
                     textViewTemp.setText(String.valueOf(tempCelsius)+ "°C");
-                    Picasso.with(getBaseContext()).load("http://openweathermap.org/img/w/"+icon+".png").into(imageViewIcon);
+                    Picasso.get().load("http://openweathermap.org/img/w/"+icon+".png").into(imageViewIcon);
                 }
             }
 
@@ -212,53 +210,17 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         textViewTemp = (TextView) findViewById(R.id.textViewTemp);
         cityListView = (ListView) findViewById(R.id.cityListView);
 
+        latitude = getIntent().getStringExtra("Latitude");
+        Log.i("Inflate from Login", "Latitude : " + latitude);
+        longitude = getIntent().getStringExtra("Longitude");
+        Log.i("Inflate from Login", "Longitude : " + longitude);
+
         readFromDB();
-
-
-        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                longitude = location.getLongitude();
-                latitude = location.getLatitude();
-                //Toast.makeText(getApplicationContext(), String.valueOf(latitude)+ String.valueOf(longitude), Toast.LENGTH_LONG).show();
-                Log.i("GPS-Coordinates", "Lat: " + String.valueOf(latitude) + ", Long: " + String.valueOf(longitude));
-                strLat = String.valueOf(latitude);
-                strLong = String.valueOf(longitude);
-               // Log.i("Coordinates: ", strLat+", "+strLong);
-            }
-
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String s) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String s) {
-
-            }
-        };
-
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED){
-
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
-
-        }
-        else{
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 100, locationListener);
-        }
-
 
         DownloadTask task = new DownloadTask();
         String result = null;
         try {
-            result = task.execute(apiCityByCoord+String.valueOf(latitude)+"&lon="+String.valueOf(longitude)+"&appid="+apiKey).get();
+            result = task.execute(apiCityByCoord+latitude+"&lon="+longitude+"&appid="+apiKey).get();
 
         } catch (ExecutionException e) {
             e.printStackTrace();
@@ -280,7 +242,6 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                 changeCity();
             }
         });
-
 
     }
 
@@ -304,35 +265,22 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
     }
 
     public void readFromDB(){
-        firebaseFirestoreDB.collection("Cities")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()){
-                            for(QueryDocumentSnapshot documentSnapshot : task.getResult()){
-                                Log.d("Retrieving SUCCESS", "Data succefully retreived " + documentSnapshot.getId() + " => " + documentSnapshot.getData());
+       databaseReference.addValueEventListener(new ValueEventListener() {
+           @Override
+           public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+               String value = dataSnapshot.getValue(String.class);
+               Log.i("DB-REFERENCE", "onDataChange: " + value);
+               prevCities.add(value);
+           }
 
-                                JSONObject dataFromDB = new JSONObject(documentSnapshot.getData());
-                                JSONArray dataFromDBArray = new JSONArray();
+           @Override
+           public void onCancelled(@NonNull DatabaseError databaseError) {
 
-
-                                for(String City : dataFromDBArray){
-
-                                }
-
-
-                                prevCities.add(String.valueOf(documentSnapshot.getData()));
-                            }
-                            Log.d("ARRAYLIST SUCCESS", "Previously added cities from DB" + prevCities.toString());
-                        }else{
-                            Log.w("Retrieving ERROR", "Error getting documents ", task.getException() );
-                        }
-                    }
-                });
+           }
+       });
     }
 
-    public void uploadToDB(){
+   /* public void uploadToDB(){
         firebaseFirestoreDB.collection("Cities")
                 .add(prevCityToDB)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -347,5 +295,5 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                         Log.w("FAILURE DB", "Error occured when adding to DB" + e );
                     }
                 });
-    }
+    }*/
 }
