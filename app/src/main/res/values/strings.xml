@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">WeatherApp</string>
-    <string name="textViewPrevCities">Other Cities</string>
+    <string name="textViewPrevCities">Latest cities</string>
     <string name="notMember">Not a member yet? Click here</string>
     <string name="alreadyMember">Already a member? Login here</string>
 </resources>

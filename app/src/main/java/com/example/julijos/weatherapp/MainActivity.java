@@ -14,6 +14,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -64,7 +66,10 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     ImageView imageViewIcon;
     TextView textViewCity, textViewDesc, textViewTemp;
-    ListView cityListView;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+
 
 
     private String apiKey = "5ffcfd078c6933d6a3e7eb281727fa75";
@@ -208,7 +213,19 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         textViewCity = (TextView) findViewById(R.id.textViewCity);
         textViewDesc = (TextView) findViewById(R.id.textViewDesc);
         textViewTemp = (TextView) findViewById(R.id.textViewTemp);
-        cityListView = (ListView) findViewById(R.id.cityListView);
+        mRecyclerView = (RecyclerView) findViewById(R.id.cityListView);
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        // specify an adapter (see also next example)
+        mAdapter = new MyAdapter(myDataset);
+        mRecyclerView.setAdapter(mAdapter);
 
         latitude = getIntent().getStringExtra("Latitude");
         Log.i("Inflate from Login", "Latitude : " + latitude);
