@@ -2,22 +2,13 @@ package com.example.julijos.weatherapp;
 
 
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,9 +17,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 
@@ -61,6 +49,8 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         changeCityName = cityName;
         Log.i("ChangeCity:  ", "applyText: " + cityName);
         Log.i("UPLOAD TO DATABASE", "databaseReference  " + changeCityName);
+        changeCityName = changeCityName.replaceAll("Göteborg", "Gothenburg");
+        changeCityName = changeCityName.replaceAll("göteborg", "Gothenburg");
         changeCityName = changeCityName.replaceAll(" ", "+");
         changeCityName = changeCityName.replaceAll("ö", "o");
         changeCityName = changeCityName.replaceAll("ä","a");
@@ -190,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         AlertDialogChangeCity alertDialogChangeCity = new AlertDialogChangeCity();
         alertDialogChangeCity.show(getSupportFragmentManager(), "Change city dialog");
     }
-    
+
     //Makes a new API call through the background thread
     public void changeCity(){
         DownloadTask task = new DownloadTask();
