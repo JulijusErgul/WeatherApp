@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity implements View.OnClickListener {
 
+
+
     EditText registerEmail, registerPassword;
     ProgressBar progressBar;
     private FirebaseAuth mAuth;
@@ -30,6 +32,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
+
 
         registerEmail = (EditText) findViewById(R.id.editTextRegisterEmail) ;
         registerPassword = (EditText)findViewById(R.id.editTextRegisterPassword);
