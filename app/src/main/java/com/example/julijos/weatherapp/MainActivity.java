@@ -1,17 +1,8 @@
 package com.example.julijos.weatherapp;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
+
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,33 +14,16 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Document;
-
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -59,8 +33,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.Nullable;
-import javax.security.auth.login.LoginException;
 
 public class MainActivity extends AppCompatActivity implements AlertDialogChangeCity.AlertDialogListener{
 
@@ -99,17 +71,13 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
     public void applyText(String cityName) {
         changeCityName = cityName;
         Log.i("ChangeCity:  ", "applyText: " + cityName);
-
-        prevCities.add(changeCityName);
-        //Replace non-acceptable charachters
         databaseReference.setValue(changeCityName);
         Log.i("UPLOAD TO DATABASE", "databaseReference  " + changeCityName);
-        //prevCityToDB.put("City name", changeCityName);
         changeCityName = changeCityName.replaceAll(" ", "+");
         changeCityName = changeCityName.replaceAll("ö", "o");
         changeCityName = changeCityName.replaceAll("ä","a");
         changeCity();
-        //uploadToDB();
+
 
     }
 
@@ -149,15 +117,11 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                     data = reader.read();
                 }
                 return result;
-
             }
             catch (Exception e){
                 e.printStackTrace();
                 return "Failed";
             }
-
-
-
 
         }
 
@@ -165,6 +129,8 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
+            readFromDB();
+
             String icon = "";
             String desc = "";
 
@@ -297,20 +263,5 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
        });
     }
 
-   /* public void uploadToDB(){
-        firebaseFirestoreDB.collection("Cities")
-                .add(prevCityToDB)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d("FireStoreDB SUCCESS", "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("FAILURE DB", "Error occured when adding to DB" + e );
-                    }
-                });
-    }*/
+
 }
