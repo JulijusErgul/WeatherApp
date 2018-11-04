@@ -37,5 +37,6 @@ dependencies {
     implementation 'com.squareup.okhttp:okhttp:1.6.0'
     implementation 'com.squareup.okhttp:okhttp-urlconnection:1.6.0'
     implementation 'com.google.firebase:firebase-database:16.0.1'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 }
 apply plugin: 'com.google.gms.google-services'
