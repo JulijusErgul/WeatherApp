@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
     private RecyclerView.LayoutManager mLayoutManager;
 
 
-
+    //API-URLs and API-key to Openweathermap API
     private String apiKey = "5ffcfd078c6933d6a3e7eb281727fa75";
     private String apiChangeCityUrl = "https://api.openweathermap.org/data/2.5/weather?q=";//change city by name
     private String apiCityByCoord = "https://api.openweathermap.org/data/2.5/weather?lat=";//get city by coordinates
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     FirebaseFirestore firebaseFirestoreDB = FirebaseFirestore.getInstance();
 
-    FirebaseDatabase database  =FirebaseDatabase.getInstance();
+    FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference databaseReference = database.getReference("Message");
 
 
@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     }
 
+    //Replaces special-charachters (like åäö, and space) in the cityname
     public void formatCityName(String cityName){
         changeCityName = cityName;
         Log.i("ChangeCity:  ", "applyText: " + cityName);
@@ -91,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         changeCity();
     }
 
+
+    //Downloading data from the API Using a Backround Thread
     public class DownloadTask extends AsyncTask<String, Void, String>{
 
         @Override
@@ -193,6 +196,8 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         mAdapter = new MyAdapter(myDataset);
         mRecyclerView.setAdapter(mAdapter);
 
+
+        //Loads the coordinaties from the loginActivity
         latitude = getIntent().getStringExtra("Latitude");
         Log.i("Inflate from Login", "Latitude : " + latitude);
         longitude = getIntent().getStringExtra("Longitude");
@@ -228,11 +233,15 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     }
 
+
+    //Opens an Alert Dialog to change to another city
     public void changeCityAlertDialog(View view){
         AlertDialogChangeCity alertDialogChangeCity = new AlertDialogChangeCity();
         alertDialogChangeCity.show(getSupportFragmentManager(), "Change city dialog");
     }
 
+
+    //Makes a new API call through the background thread
     public void changeCity(){
         DownloadTask task = new DownloadTask();
         String result = null;
