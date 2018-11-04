@@ -5,8 +5,6 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -38,9 +36,8 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     ImageView imageViewIcon;
     TextView textViewCity, textViewDesc, textViewTemp;
-    private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    private ListView cityListView;
+
 
 
     //API-URLs and API-key to Openweathermap API
@@ -57,32 +54,21 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
     String cityName = "";
     double tempCelsius;
 
-    ArrayList<String> prevCities = new ArrayList<String>();
-    Map<String, String> prevCityToDB = new HashMap<String,String>();
-
-    FirebaseFirestore firebaseFirestoreDB = FirebaseFirestore.getInstance();
-
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference databaseReference = database.getReference("Message");
 
 
-
-    @Override
+    //Replaces special-charachters (like åäö, and space) in the cityname
     public void applyText(String cityName) {
         changeCityName = cityName;
         Log.i("ChangeCity:  ", "applyText: " + cityName);
-        databaseReference.setValue(changeCityName);
         Log.i("UPLOAD TO DATABASE", "databaseReference  " + changeCityName);
         changeCityName = changeCityName.replaceAll(" ", "+");
         changeCityName = changeCityName.replaceAll("ö", "o");
         changeCityName = changeCityName.replaceAll("ä","a");
         changeCity();
 
-
     }
 
-    //Replaces special-charachters (like åäö, and space) in the cityname
-    public void formatCityName(String cityName){
+/*    public void formatCityName(String cityName){
         changeCityName = cityName;
         Log.i("ChangeCity:  ", "applyText: " + cityName);
         //Replace non-acceptable charachters
@@ -90,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         changeCityName = changeCityName.replaceAll("ö", "o");
         changeCityName = changeCityName.replaceAll("ä","a");
         changeCity();
-    }
+    }*/
 
 
     //Downloading data from the API Using a Backround Thread
@@ -125,20 +111,16 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                 e.printStackTrace();
                 return "Failed";
             }
-
         }
-
 
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            readFromDB();
 
             String icon = "";
-            String desc = "";
+           // String desc = "";
 
             try {
-
                 JSONObject jsonObject = new JSONObject(result);
                 String weatherInfo = jsonObject.getString("weather");
                 JSONObject jsonPart = null;
@@ -168,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                 e.printStackTrace();
             }
 
-
             Log.i("Website content ", result);
         }
     }
@@ -182,34 +163,19 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         textViewCity = (TextView) findViewById(R.id.textViewCity);
         textViewDesc = (TextView) findViewById(R.id.textViewDesc);
         textViewTemp = (TextView) findViewById(R.id.textViewTemp);
-        mRecyclerView = (RecyclerView) findViewById(R.id.cityListView);
+        cityListView = (ListView) findViewById(R.id.cityListView);
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(true);
-
-        // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-
-        // specify an adapter (see also next example)
-        mAdapter = new MyAdapter(myDataset);
-        mRecyclerView.setAdapter(mAdapter);
-
-
-        //Loads the coordinaties from the loginActivity
+        //Loads the coordinaties from the loginActivity & SignupActivity
         latitude = getIntent().getStringExtra("Latitude");
-        Log.i("Inflate from Login", "Latitude : " + latitude);
+        //Log.i("Inflate from Login", "Latitude : " + latitude);
         longitude = getIntent().getStringExtra("Longitude");
-        Log.i("Inflate from Login", "Longitude : " + longitude);
+        //Log.i("Inflate from Login", "Longitude : " + longitude);
 
-        readFromDB();
 
         DownloadTask task = new DownloadTask();
         String result = null;
         try {
             result = task.execute(apiCityByCoord+latitude+"&lon="+longitude+"&appid="+apiKey).get();
-
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -217,30 +183,14 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         }
         Log.i("Contents of URL ", result);
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, prevCities);
-        cityListView.setAdapter(arrayAdapter);
-
-        cityListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.i("City Tapped", prevCities.get(i));
-                changeCityName = prevCities.get(i);
-                Log.i("ChangeCityName: ", changeCityName);
-                formatCityName(changeCityName);
-                changeCity();
-            }
-        });
-
     }
-
 
     //Opens an Alert Dialog to change to another city
     public void changeCityAlertDialog(View view){
         AlertDialogChangeCity alertDialogChangeCity = new AlertDialogChangeCity();
         alertDialogChangeCity.show(getSupportFragmentManager(), "Change city dialog");
     }
-
-
+    
     //Makes a new API call through the background thread
     public void changeCity(){
         DownloadTask task = new DownloadTask();
@@ -255,22 +205,5 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         }
         Log.i("Contents of URL ", result);
     }
-
-    public void readFromDB(){
-       databaseReference.addValueEventListener(new ValueEventListener() {
-           @Override
-           public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-               String value = dataSnapshot.getValue(String.class);
-               Log.i("DB-REFERENCE", "onDataChange: " + value);
-               prevCities.add(value);
-           }
-
-           @Override
-           public void onCancelled(@NonNull DatabaseError databaseError) {
-
-           }
-       });
-    }
-
 
 }
