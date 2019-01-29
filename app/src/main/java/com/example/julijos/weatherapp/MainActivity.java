@@ -2,22 +2,13 @@ package com.example.julijos.weatherapp;
 
 
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,9 +17,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 
@@ -36,7 +24,9 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     ImageView imageViewIcon;
     TextView textViewCity, textViewDesc, textViewTemp;
-    ListView cityListView;
+    private ListView cityListView;
+
+
 
     //API-URLs and API-key to Openweathermap API
     private String apiKey = "5ffcfd078c6933d6a3e7eb281727fa75";
@@ -52,32 +42,23 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
     String cityName = "";
     double tempCelsius;
 
-    ArrayList<String> prevCities = new ArrayList<String>();
-    Map<String, String> prevCityToDB = new HashMap<String,String>();
-
-    FirebaseFirestore firebaseFirestoreDB = FirebaseFirestore.getInstance();
-
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference databaseReference = database.getReference("Message");
 
 
-
-    @Override
+    //Replaces special-charachters (like åäö, and space) in the cityname
     public void applyText(String cityName) {
         changeCityName = cityName;
         Log.i("ChangeCity:  ", "applyText: " + cityName);
-        databaseReference.setValue(changeCityName);
         Log.i("UPLOAD TO DATABASE", "databaseReference  " + changeCityName);
+        changeCityName = changeCityName.replaceAll("Göteborg", "Gothenburg");
+        changeCityName = changeCityName.replaceAll("göteborg", "Gothenburg");
         changeCityName = changeCityName.replaceAll(" ", "+");
         changeCityName = changeCityName.replaceAll("ö", "o");
         changeCityName = changeCityName.replaceAll("ä","a");
         changeCity();
 
-
     }
 
-    //Replaces special-charachters (like åäö, and space) in the cityname
-    public void formatCityName(String cityName){
+/*    public void formatCityName(String cityName){
         changeCityName = cityName;
         Log.i("ChangeCity:  ", "applyText: " + cityName);
         //Replace non-acceptable charachters
@@ -85,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         changeCityName = changeCityName.replaceAll("ö", "o");
         changeCityName = changeCityName.replaceAll("ä","a");
         changeCity();
-    }
+    }*/
 
 
     //Downloading data from the API Using a Backround Thread
@@ -120,20 +101,16 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                 e.printStackTrace();
                 return "Failed";
             }
-
         }
-
 
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            readFromDB();
 
             String icon = "";
-            String desc = "";
+           // String desc = "";
 
             try {
-
                 JSONObject jsonObject = new JSONObject(result);
                 String weatherInfo = jsonObject.getString("weather");
                 JSONObject jsonPart = null;
@@ -163,7 +140,6 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                 e.printStackTrace();
             }
 
-
             Log.i("Website content ", result);
         }
     }
@@ -179,20 +155,17 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         textViewTemp = (TextView) findViewById(R.id.textViewTemp);
         cityListView = (ListView) findViewById(R.id.cityListView);
 
-
-        //Loads the coordinaties from the loginActivity
+        //Loads the coordinaties from the loginActivity & SignupActivity
         latitude = getIntent().getStringExtra("Latitude");
-        Log.i("Inflate from Login", "Latitude : " + latitude);
+        //Log.i("Inflate from Login", "Latitude : " + latitude);
         longitude = getIntent().getStringExtra("Longitude");
-        Log.i("Inflate from Login", "Longitude : " + longitude);
+        //Log.i("Inflate from Login", "Longitude : " + longitude);
 
-        readFromDB();
 
         DownloadTask task = new DownloadTask();
         String result = null;
         try {
             result = task.execute(apiCityByCoord+latitude+"&lon="+longitude+"&appid="+apiKey).get();
-
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -200,29 +173,13 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         }
         Log.i("Contents of URL ", result);
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, prevCities);
-        cityListView.setAdapter(arrayAdapter);
-
-        cityListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.i("City Tapped", prevCities.get(i));
-                changeCityName = prevCities.get(i);
-                Log.i("ChangeCityName: ", changeCityName);
-                formatCityName(changeCityName);
-                changeCity();
-            }
-        });
-
     }
-
 
     //Opens an Alert Dialog to change to another city
     public void changeCityAlertDialog(View view){
         AlertDialogChangeCity alertDialogChangeCity = new AlertDialogChangeCity();
         alertDialogChangeCity.show(getSupportFragmentManager(), "Change city dialog");
     }
-
 
     //Makes a new API call through the background thread
     public void changeCity(){
@@ -238,22 +195,5 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         }
         Log.i("Contents of URL ", result);
     }
-
-    public void readFromDB(){
-       databaseReference.addValueEventListener(new ValueEventListener() {
-           @Override
-           public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-               String value = dataSnapshot.getValue(String.class);
-               Log.i("DB-REFERENCE", "onDataChange: " + value);
-               prevCities.add(value);
-           }
-
-           @Override
-           public void onCancelled(@NonNull DatabaseError databaseError) {
-
-           }
-       });
-    }
-
 
 }
