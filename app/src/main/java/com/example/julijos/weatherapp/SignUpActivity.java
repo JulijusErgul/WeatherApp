@@ -25,8 +25,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+//import com.google.firebase.database.DatabaseReference;
+//import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.regex.Pattern;
 
@@ -36,9 +36,9 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
     EditText registerEmail, registerPassword;
     ProgressBar progressBar;
-    private FirebaseAuth mAuth;
-    private FirebaseDatabase mDatabase;
-    private DatabaseReference databaseReference;
+    //private FirebaseAuth mAuth;
+   // private FirebaseDatabase mDatabase;
+    //private DatabaseReference databaseReference;
 
 
     LocationManager locationManager;
@@ -61,7 +61,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         findViewById(R.id.btnRegister).setOnClickListener(this);
         findViewById(R.id.textViewAlreadyMember).setOnClickListener(this);
 
-        mAuth = FirebaseAuth.getInstance();
+       // mAuth = FirebaseAuth.getInstance();
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -132,36 +132,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
         user.setmEmail(email);
         user.setmPassword(password);
-
-        progressBar.setVisibility(View.VISIBLE);
-        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if(task.isSuccessful()){
-                    progressBar.setVisibility(View.GONE);
-                    Log.i("SUCCESS", "onComplete: Registration Successful");
-                    Toast.makeText(getApplicationContext(), "You are successfully registered", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//to not come back to loginActivity when back is tapped
-                    intent.putExtra("Latitude", strLat);
-                    intent.putExtra("Longitude", strLong);
-                    startActivity(intent);
-                }else{
-                    Log.i("FAILURE", "onComplete: Registration Failed");
-                    if(task.getException() instanceof FirebaseAuthUserCollisionException){
-                        Log.i("UserCollision", "onComplete: Email already registere");
-                        registerEmail.setError("Email already registered");
-                        registerEmail.requestFocus();
-                        progressBar.setVisibility(View.GONE);
-                    }else {
-                        Log.i("ERROR", "onComplete: Error occured");
-                        Toast.makeText(getApplicationContext(), "Some error occured", Toast.LENGTH_LONG).show();
-                    }
-                }
-            }
-        });
-        String userID = mAuth.getUid();
-        Log.i("USER-ID", "Your Userid is: " + userID);
 
     }
 

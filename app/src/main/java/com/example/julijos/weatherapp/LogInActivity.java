@@ -32,7 +32,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
 
     EditText loginEmail, loginPassword;
     ProgressBar progressBar;
-    private FirebaseAuth mAuth;
+   // private FirebaseAuth mAuth;
 
     LocationManager locationManager;
     LocationListener locationListener;
@@ -52,7 +52,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.btnLogin).setOnClickListener(this);
         findViewById(R.id.textViewNotMember).setOnClickListener(this);
 
-        mAuth = FirebaseAuth.getInstance();
+       // mAuth = FirebaseAuth.getInstance();
 
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -121,36 +121,8 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
             loginPassword.requestFocus();
             return;
         }
+        startActivity(new Intent(this, MainActivity.class));
 
-        progressBar.setVisibility(View.VISIBLE);
-
-        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-
-                if(task.isSuccessful()) {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(getApplicationContext(), "You are successfully logged in", Toast.LENGTH_SHORT).show();
-                    Log.i("SUCCESS", "onComplete: Login successful");
-                    //startActivity(new Intent(this, MainActivity.class));
-                    Intent intent = new Intent(LogInActivity.this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);//to not come back to loginActivity when back is tapped
-                    intent.putExtra("Latitude", strLat);
-                    intent.putExtra("Longitude", strLong);
-                    startActivity(intent);
-                }else{
-                    if(task.getException() instanceof FirebaseAuthEmailException){
-                        Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                        Log.i("FAILURE ", "onComplete: " + task.getException().getMessage());
-                        loginEmail.setError("Use registered Email");
-                        loginEmail.requestFocus();
-                        progressBar.setVisibility(View.GONE);
-                    }else {
-                        Log.i("ERROR ", "onComplete: Exception" + task.getException().getMessage());
-                    }
-                }
-            }
-        });
 
     }
 
@@ -162,6 +134,8 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.btnLogin:
                 userLogin();
+
+
                 break;
         }
 
