@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     String latitude="", longitude="";
 
-    String icon = "";
+   // String icon = "";
     String desc = "";
     String cityName = "";
     double tempCelsius;
@@ -119,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                 for(int i = 0 ; i < array.length(); i++){
                     jsonPart = array.getJSONObject(i);
                     icon = jsonPart.getString("icon");
+                    Log.i("iconID", "onPostExecute: " + icon);
                     desc = jsonPart.getString("description");
                 }
 
@@ -132,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                     textViewCity.setText(cityName);
                     textViewDesc.setText(desc);
                     textViewTemp.setText(String.valueOf(tempCelsius)+ "°C");
+                    //Picasso.get().load("http://openweathermap.org/img/w/"+icon+".png").into(imageViewIcon);
                     Picasso.get().load("http://openweathermap.org/img/w/"+icon+".png").into(imageViewIcon);
                 }
             }
@@ -153,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         textViewCity = (TextView) findViewById(R.id.textViewCity);
         textViewDesc = (TextView) findViewById(R.id.textViewDesc);
         textViewTemp = (TextView) findViewById(R.id.textViewTemp);
-        cityListView = (ListView) findViewById(R.id.cityListView);
+        //cityListView = (ListView) findViewById(R.id.cityListView);
 
         //Loads the coordinaties from the loginActivity & SignupActivity
         latitude = getIntent().getStringExtra("Latitude");
