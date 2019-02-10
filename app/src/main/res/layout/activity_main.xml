@@ -6,99 +6,104 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="70">
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp">
 
-        <ImageView
-            android:id="@+id/imageViewWeateherIcon"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_alignBottom="@+id/textViewTemp"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="137dp"
-            android:paddingTop="25dp"
-            app:srcCompat="@drawable/fronticon" />
-
-        <TextView
-            android:id="@+id/textViewTemp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginStart="33dp"
-            android:layout_marginLeft="33dp"
-            android:layout_marginTop="280dp"
-            android:text="25 C"
-            android:textSize="100dp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/textViewDesc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginStart="122dp"
-            android:layout_marginLeft="122dp"
-            android:layout_marginTop="425dp"
-            android:text="Clouds"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/textViewCity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginStart="132dp"
-            android:layout_marginLeft="132dp"
-            android:layout_marginTop="455dp"
-            android:text="Berlin"
-            android:textStyle="italic" />
-
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_weight="30">
-
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:layout_weight="70">
 
-            <Button
-                android:layout_weight="50"
-                android:id="@+id/btnChangeCity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <ImageView
+                android:id="@+id/imageViewWeateherIcon"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_alignBottom="@+id/textViewTemp"
                 android:layout_centerHorizontal="true"
-                android:layout_centerVertical="false"
-                android:onClick="changeCityAlertDialog"
-                android:text="Change City" />
-            <Button
-                android:layout_weight="50"
+                android:layout_marginBottom="151dp"
+                android:paddingTop="25dp"
+                app:srcCompat="@drawable/noweather" />
+
+            <TextView
+                android:id="@+id/textViewTemp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Logout"/>
-        </LinearLayout>
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="42dp"
+                android:layout_marginLeft="42dp"
+                android:layout_marginTop="217dp"
+                android:text="no?"
+                android:textSize="100dp"
+                android:textStyle="bold" />
 
-    </RelativeLayout>
-</LinearLayout>
+            <TextView
+                android:id="@+id/textViewDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="156dp"
+                android:layout_marginLeft="156dp"
+                android:layout_marginTop="461dp"
+                android:text="no Desc"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewCity"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="157dp"
+                android:layout_marginLeft="157dp"
+                android:layout_marginTop="410dp"
+                android:text="no City"
+                android:textStyle="italic" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_weight="30">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnChangeCity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="false"
+                    android:layout_weight="50"
+                    android:onClick="changeCityAlertDialog"
+                    android:text="Change City" />
+
+                <Button
+                    android:id="@+id/btnLogout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="50"
+                    android:onClick="userLogout"
+                    android:text="Logout" />
+            </LinearLayout>
+
+        </RelativeLayout>
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

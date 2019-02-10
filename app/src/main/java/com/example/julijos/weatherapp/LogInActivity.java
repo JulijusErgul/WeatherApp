@@ -116,7 +116,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
             loginPassword.requestFocus();
             return;
         }
-        startActivity(new Intent(this, MainActivity.class));
+        startActivity(new Intent(this, MainActivity.class).putExtra("latitude", strLat).putExtra("longitude", strLong));
 
 
     }
@@ -129,8 +129,6 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.btnLogin:
                 userLogin();
-
-
                 break;
         }
 

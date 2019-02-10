@@ -141,6 +141,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         switch(view.getId()){
             case R.id.btnRegister:
                 registerUser();
+
+                startActivity(new Intent(this, MainActivity.class).putExtra("latitude", strLat).putExtra("longitude", strLong));
                 break;
 
             case R.id.textViewAlreadyMember:
