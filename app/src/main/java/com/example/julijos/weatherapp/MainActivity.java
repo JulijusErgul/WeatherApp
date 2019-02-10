@@ -1,6 +1,7 @@
 package com.example.julijos.weatherapp;
 
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,7 +25,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     ImageView imageViewIcon;
     TextView textViewCity, textViewDesc, textViewTemp;
-    private ListView cityListView;
+    //private ListView cityListView;
 
 
 
@@ -37,11 +38,38 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     String latitude="", longitude="";
 
-    String icon = "";
+   // String icon = "";
     String desc = "";
     String cityName = "";
     double tempCelsius;
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+
+        textViewCity = (TextView) findViewById(R.id.textViewCity);
+        textViewDesc = (TextView) findViewById(R.id.textViewDesc);
+        textViewTemp = (TextView) findViewById(R.id.textViewTemp);
+
+        //Loads the coordinaties from the loginActivity & SignupActivity
+        latitude = getIntent().getStringExtra("latitude");
+        longitude = getIntent().getStringExtra("longitude");
+        Log.i("Coordinates", "onCreate: lon: "+longitude+ ", lat:" + latitude);
+
+        DownloadTask task = new DownloadTask();
+        String result = null;
+        try {
+            result = task.execute(apiCityByCoord+latitude+"&lon="+longitude+"&appid="+apiKey).get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Log.i("Contents of URL ", result);
+
+    }
 
 
     //Replaces special-charachters (like åäö, and space) in the cityname
@@ -57,16 +85,6 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         changeCity();
 
     }
-
-/*    public void formatCityName(String cityName){
-        changeCityName = cityName;
-        Log.i("ChangeCity:  ", "applyText: " + cityName);
-        //Replace non-acceptable charachters
-        changeCityName = changeCityName.replaceAll(" ", "+");
-        changeCityName = changeCityName.replaceAll("ö", "o");
-        changeCityName = changeCityName.replaceAll("ä","a");
-        changeCity();
-    }*/
 
 
     //Downloading data from the API Using a Backround Thread
@@ -119,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                 for(int i = 0 ; i < array.length(); i++){
                     jsonPart = array.getJSONObject(i);
                     icon = jsonPart.getString("icon");
+                    Log.i("iconID", "onPostExecute: " + icon);
                     desc = jsonPart.getString("description");
                 }
 
@@ -128,11 +147,57 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                 cityName = jsonObject.getString("name");
 
                 if(cityName != "" && String.valueOf(tempCelsius)!= "" && desc !=""){
+                    imageViewIcon = findViewById(R.id.imageViewWeateherIcon);
                     Log.i("if-Sats", cityName +String.valueOf(tempCelsius) + desc);
-                    textViewCity.setText(cityName);
-                    textViewDesc.setText(desc);
+                    textViewCity.setText(cityName.toUpperCase());
+                    textViewDesc.setText(desc.toUpperCase());
                     textViewTemp.setText(String.valueOf(tempCelsius)+ "°C");
-                    Picasso.get().load("http://openweathermap.org/img/w/"+icon+".png").into(imageViewIcon);
+                    String iconURL = "i" + icon +".png";
+                    Log.i("Icon URL", "onPostExecute: " + iconURL);
+                    //Glide.with(imageViewIcon).load(iconURL).into(imageViewIcon);
+
+                    if(iconURL.equals("i01d.png"))
+                        Picasso.get().load(R.drawable.i01d).into(imageViewIcon);
+                    else if (iconURL.equals("i01n.png"))
+                        Picasso.get().load(R.drawable.i01n).into(imageViewIcon);
+                    else if(iconURL.equals("i02d.png"))
+                        Picasso.get().load(R.drawable.i02d).into(imageViewIcon);
+                    else if (iconURL.equals("i02n.png"))
+                        Picasso.get().load(R.drawable.i02n).into(imageViewIcon);
+                    else if (iconURL.equals("i03d.png"))
+                        Picasso.get().load(R.drawable.i03d).into(imageViewIcon);
+                    else if(iconURL.equals("i03n.png"))
+                        Picasso.get().load(R.drawable.i03n).into(imageViewIcon);
+                    else if (iconURL.equals("i04d.png"))
+                        Picasso.get().load(R.drawable.i04d).into(imageViewIcon);
+                    else if (iconURL.equals("i04n.png"))
+                        Picasso.get().load(R.drawable.i04n).into(imageViewIcon);
+                    else if(iconURL.equals("i09d.png"))
+                        Picasso.get().load(R.drawable.i09d).into(imageViewIcon);
+                    else if (iconURL.equals("i09n.png"))
+                        Picasso.get().load(R.drawable.i09n).into(imageViewIcon);
+                    else if (iconURL.equals("i10d.png"))
+                        Picasso.get().load(R.drawable.i10d).into(imageViewIcon);
+                    else if(iconURL.equals("i10n.png"))
+                        Picasso.get().load(R.drawable.i10n).into(imageViewIcon);
+                    else if (iconURL.equals("i11d.png"))
+                        Picasso.get().load(R.drawable.i11d).into(imageViewIcon);
+                    else if (iconURL.equals("i11n.png"))
+                        Picasso.get().load(R.drawable.i11n).into(imageViewIcon);
+                    else if(iconURL.equals("i13d.png"))
+                        Picasso.get().load(R.drawable.i13d).into(imageViewIcon);
+                    else if (iconURL.equals("i13n.png"))
+                        Picasso.get().load(R.drawable.i13n).into(imageViewIcon);
+                    else if(iconURL.equals("i50d.png"))
+                        Picasso.get().load(R.drawable.i50d).into(imageViewIcon);
+                    else if (iconURL.equals("i50n.png"))
+                        Picasso.get().load(R.drawable.i50n).into(imageViewIcon);
+                    else
+                        Picasso.get().load(R.drawable.noweather).into(imageViewIcon);
+
+
+
+
                 }
             }
 
@@ -144,37 +209,12 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        imageViewIcon = (ImageView) findViewById(R.id.imageViewWeateherIcon);
-        textViewCity = (TextView) findViewById(R.id.textViewCity);
-        textViewDesc = (TextView) findViewById(R.id.textViewDesc);
-        textViewTemp = (TextView) findViewById(R.id.textViewTemp);
-        cityListView = (ListView) findViewById(R.id.cityListView);
-
-        //Loads the coordinaties from the loginActivity & SignupActivity
-        latitude = getIntent().getStringExtra("Latitude");
-        //Log.i("Inflate from Login", "Latitude : " + latitude);
-        longitude = getIntent().getStringExtra("Longitude");
-        //Log.i("Inflate from Login", "Longitude : " + longitude);
 
 
-        DownloadTask task = new DownloadTask();
-        String result = null;
-        try {
-            result = task.execute(apiCityByCoord+latitude+"&lon="+longitude+"&appid="+apiKey).get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        Log.i("Contents of URL ", result);
-
+    //firebaselogout
+    public void userLogout(View view){
+        startActivity(new Intent(this, LogInActivity.class));
     }
-
     //Opens an Alert Dialog to change to another city
     public void changeCityAlertDialog(View view){
         AlertDialogChangeCity alertDialogChangeCity = new AlertDialogChangeCity();
@@ -196,4 +236,19 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         Log.i("Contents of URL ", result);
     }
 
+
+   /* public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.btnChangeCity:
+                changeCityAlertDialog(view);
+                //startActivity(new Intent(this, SignUpActivity.class));
+                break;
+            case R.id.btnLogout:
+                userLogout(view);
+
+
+                break;
+        }
+
+    }*/
 }
