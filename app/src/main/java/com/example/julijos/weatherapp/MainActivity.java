@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
@@ -25,9 +24,6 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     ImageView imageViewIcon;
     TextView textViewCity, textViewDesc, textViewTemp;
-    //private ListView cityListView;
-
-
 
     //API-URLs and API-key to Openweathermap API
     private String apiKey = "5ffcfd078c6933d6a3e7eb281727fa75";
@@ -35,10 +31,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
     private String apiCityByCoord = "https://api.openweathermap.org/data/2.5/weather?lat=";//get city by coordinates
 
     String changeCityName ="";
-
     String latitude="", longitude="";
-
-   // String icon = "";
     String desc = "";
     String cityName = "";
     double tempCelsius;
@@ -83,7 +76,6 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         changeCityName = changeCityName.replaceAll("ö", "o");
         changeCityName = changeCityName.replaceAll("ä","a");
         changeCity();
-
     }
 
 
@@ -126,7 +118,6 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
             super.onPostExecute(result);
 
             String icon = "";
-           // String desc = "";
 
             try {
                 JSONObject jsonObject = new JSONObject(result);
@@ -154,7 +145,6 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
                     textViewTemp.setText(String.valueOf(tempCelsius)+ "°C");
                     String iconURL = "i" + icon +".png";
                     Log.i("Icon URL", "onPostExecute: " + iconURL);
-                    //Glide.with(imageViewIcon).load(iconURL).into(imageViewIcon);
 
                     if(iconURL.equals("i01d.png"))
                         Picasso.get().load(R.drawable.i01d).into(imageViewIcon);
@@ -236,19 +226,4 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         Log.i("Contents of URL ", result);
     }
 
-
-   /* public void onClick(View view) {
-        switch (view.getId()){
-            case R.id.btnChangeCity:
-                changeCityAlertDialog(view);
-                //startActivity(new Intent(this, SignUpActivity.class));
-                break;
-            case R.id.btnLogout:
-                userLogout(view);
-
-
-                break;
-        }
-
-    }*/
 }
