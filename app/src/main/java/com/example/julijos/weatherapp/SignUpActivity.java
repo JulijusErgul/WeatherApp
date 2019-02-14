@@ -20,25 +20,21 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthUserCollisionException;
-//import com.google.firebase.database.DatabaseReference;
-//import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity implements View.OnClickListener {
 
-    User user;
+    //User user;
 
     EditText registerEmail, registerPassword;
     ProgressBar progressBar;
-    //private FirebaseAuth mAuth;
-   // private FirebaseDatabase mDatabase;
-    //private DatabaseReference databaseReference;
 
 
     LocationManager locationManager;
@@ -47,12 +43,23 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     double longitude, latitude;
     String strLong, strLat;
 
+    private FirebaseAuth mAuth;
+   // FirebaseUser currentUser = null;
+
+    boolean userCreated = false;
+
+   /* @Override
+    public void onStart(){
+        super.onStart();
+
+        currentUser = mAuth.getCurrentUser();
+        updateUI(currentUser);
+    }*/
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
-
-        user = new User();
 
         registerEmail = (EditText) findViewById(R.id.editTextRegisterEmail) ;
         registerPassword = (EditText)findViewById(R.id.editTextRegisterPassword);
@@ -61,7 +68,9 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         findViewById(R.id.btnRegister).setOnClickListener(this);
         findViewById(R.id.textViewAlreadyMember).setOnClickListener(this);
 
-       // mAuth = FirebaseAuth.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+
+
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -130,10 +139,36 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
             return;
         }
 
-        user.setmEmail(email);
+        /*user.setmEmail(email);
         user.setmPassword(password);
+*/
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if(task.isSuccessful()){
+                            //sign in success, update UI with the signed-in user information
+                            Log.d("Sign in Success", "onComplete: Success");
+                            Toast.makeText(SignUpActivity.this, "Authentication Successful", Toast.LENGTH_SHORT).show();
+                            userCreated = true;
+                            //FirebaseUser user = mAuth.getCurrentUser();
+                           // updateUI(user);
+                        }
+                        else{
+                            //if sign in fails, display a message to the user.
+                            Log.w("createUserWithEmail", "createUserWithEmail: failure" );
+                            Toast.makeText(SignUpActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                            userCreated = false;
+                            //updateUI(null);
+                        }
+                    }
+                });
 
     }
+
+    /*public void updateUI(FirebaseUser user) {
+        currentUser = user;
+    }*/
 
 
     @Override
@@ -141,8 +176,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         switch(view.getId()){
             case R.id.btnRegister:
                 registerUser();
-
-                startActivity(new Intent(this, MainActivity.class).putExtra("latitude", strLat).putExtra("longitude", strLong));
+                if(userCreated == true)
+                    startActivity(new Intent(this, MainActivity.class).putExtra("latitude", strLat).putExtra("longitude", strLong));
                 break;
 
             case R.id.textViewAlreadyMember:

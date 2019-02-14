@@ -19,7 +19,11 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 
 public class LogInActivity extends AppCompatActivity implements View.OnClickListener {
@@ -35,6 +39,25 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
     double longitude, latitude;
     String strLong, strLat;
 
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    FirebaseUser currentUser;
+    boolean loginStatus = false;
+
+    @Override
+    public void onStart(){
+        super.onStart();
+//        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mAuthListener != null){
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +70,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
         findViewById(R.id.btnLogin).setOnClickListener(this);
         findViewById(R.id.textViewNotMember).setOnClickListener(this);
 
-
+        mAuth = FirebaseAuth.getInstance();
 
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -79,6 +102,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
             }
         };
 
+
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED){
 
@@ -89,6 +113,10 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 100, locationListener);
         }
 
+    }
+
+    private void updateUI(FirebaseUser user) {
+        currentUser = user;
     }
 
 
@@ -116,10 +144,31 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
             loginPassword.requestFocus();
             return;
         }
-        startActivity(new Intent(this, MainActivity.class).putExtra("latitude", strLat).putExtra("longitude", strLong));
 
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+
+
+                        if(task.isSuccessful()){
+                            Log.d("Login: ", "login successful");
+                            Toast.makeText(LogInActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                            loginStatus = true;
+                        }
+                        else{
+                            Log.d("Login", "Failed to login");
+                            Toast.makeText(LogInActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
+                            loginStatus = false;
+                        }
+                    }
+                });
 
     }
+
+   /* public void updateUI(FirebaseUser user) {
+        currentUser = user;
+    }*/
 
     @Override
     public void onClick(View view) {
@@ -129,6 +178,8 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.btnLogin:
                 userLogin();
+                if(loginStatus == true)
+                    startActivity(new Intent(this, MainActivity.class).putExtra("latitude", strLat).putExtra("longitude", strLong));
                 break;
         }
 
