@@ -15,27 +15,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Toast;
-
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
-import java.util.regex.Pattern;
 
 public class SignUpActivity extends AppCompatActivity implements View.OnClickListener {
 
-    //User user;
 
     EditText registerEmail, registerPassword;
-    ProgressBar progressBar;
-
 
     LocationManager locationManager;
     LocationListener locationListener;
@@ -44,17 +34,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     String strLong, strLat;
 
     private FirebaseAuth mAuth;
-   // FirebaseUser currentUser = null;
-
     boolean userCreated = false;
 
-   /* @Override
-    public void onStart(){
-        super.onStart();
-
-        currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
-    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +44,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
         registerEmail = (EditText) findViewById(R.id.editTextRegisterEmail) ;
         registerPassword = (EditText)findViewById(R.id.editTextRegisterPassword);
-        progressBar = (ProgressBar)findViewById(R.id.registerProgressBar);
 
         findViewById(R.id.btnRegister).setOnClickListener(this);
         findViewById(R.id.textViewAlreadyMember).setOnClickListener(this);
@@ -78,11 +58,10 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
             public void onLocationChanged(Location location) {
                 longitude = location.getLongitude();
                 latitude = location.getLatitude();
-                //Toast.makeText(getApplicationContext(), String.valueOf(latitude)+ String.valueOf(longitude), Toast.LENGTH_LONG).show();
                 Log.i("GPS-Coordinates", "Lat: " + String.valueOf(latitude) + ", Long: " + String.valueOf(longitude));
                 strLat = String.valueOf(latitude);
                 strLong = String.valueOf(longitude);
-                // Log.i("Coordinates: ", strLat+", "+strLong);
+
             }
 
             @Override
@@ -116,8 +95,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         String email = registerEmail.getText().toString().trim();
         String password = registerPassword.getText().toString().trim();
 
-
-
         if (email.isEmpty()) {
             registerEmail.setError("Email is required");
             registerEmail.requestFocus();
@@ -139,9 +116,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
             return;
         }
 
-        /*user.setmEmail(email);
-        user.setmPassword(password);
-*/
+
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -151,24 +126,19 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                             Log.d("Sign in Success", "onComplete: Success");
                             Toast.makeText(SignUpActivity.this, "Authentication Successful", Toast.LENGTH_SHORT).show();
                             userCreated = true;
-                            //FirebaseUser user = mAuth.getCurrentUser();
-                           // updateUI(user);
                         }
                         else{
                             //if sign in fails, display a message to the user.
                             Log.w("createUserWithEmail", "createUserWithEmail: failure" );
                             Toast.makeText(SignUpActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                             userCreated = false;
-                            //updateUI(null);
+
                         }
                     }
                 });
 
     }
 
-    /*public void updateUI(FirebaseUser user) {
-        currentUser = user;
-    }*/
 
 
     @Override

@@ -16,22 +16,17 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 
 public class LogInActivity extends AppCompatActivity implements View.OnClickListener {
 
 
     EditText loginEmail, loginPassword;
-    ProgressBar progressBar;
-
 
     LocationManager locationManager;
     LocationListener locationListener;
@@ -40,23 +35,8 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
     String strLong, strLat;
 
     private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
-    FirebaseUser currentUser;
     boolean loginStatus = false;
 
-    @Override
-    public void onStart(){
-        super.onStart();
-//        mAuth.addAuthStateListener(mAuthListener);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if(mAuthListener != null){
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +45,6 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
 
         loginEmail = (EditText)findViewById(R.id.editTextLoginEmail);
         loginPassword = (EditText)findViewById(R.id.editTextLoginPassword);
-        progressBar = (ProgressBar)findViewById(R.id.loginProgressBar);
 
         findViewById(R.id.btnLogin).setOnClickListener(this);
         findViewById(R.id.textViewNotMember).setOnClickListener(this);
@@ -79,11 +58,9 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
             public void onLocationChanged(Location location) {
                 longitude = location.getLongitude();
                 latitude = location.getLatitude();
-                //Toast.makeText(getApplicationContext(), String.valueOf(latitude)+ String.valueOf(longitude), Toast.LENGTH_LONG).show();
                 Log.i("GPS-Coordinates", "Lat: " + String.valueOf(latitude) + ", Long: " + String.valueOf(longitude));
                 strLat = String.valueOf(latitude);
                 strLong = String.valueOf(longitude);
-                // Log.i("Coordinates: ", strLat+", "+strLong);
             }
 
             @Override
@@ -113,10 +90,6 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 100, locationListener);
         }
 
-    }
-
-    private void updateUI(FirebaseUser user) {
-        currentUser = user;
     }
 
 
@@ -150,7 +123,6 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
 
-
                         if(task.isSuccessful()){
                             Log.d("Login: ", "login successful");
                             Toast.makeText(LogInActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
@@ -166,9 +138,6 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
-   /* public void updateUI(FirebaseUser user) {
-        currentUser = user;
-    }*/
 
     @Override
     public void onClick(View view) {
