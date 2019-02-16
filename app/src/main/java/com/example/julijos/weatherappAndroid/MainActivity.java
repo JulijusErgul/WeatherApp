@@ -1,4 +1,4 @@
-package com.example.julijos.weatherapp;
+package com.example.julijos.weatherappAndroid;
 
 
 import android.content.Intent;
@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
     String desc = "";
     String cityName = "";
     double tempCelsius;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -203,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     //firebaselogout
     public void userLogout(View view){
+        FirebaseAuth.getInstance().signOut();
         startActivity(new Intent(this, LogInActivity.class));
     }
     //Opens an Alert Dialog to change to another city

@@ -1,4 +1,4 @@
-package com.example.julijos.weatherapp;
+package com.example.julijos.weatherappAndroid;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

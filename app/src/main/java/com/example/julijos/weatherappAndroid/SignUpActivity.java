@@ -1,4 +1,4 @@
-package com.example.julijos.weatherapp;
+package com.example.julijos.weatherappAndroid;
 
 import android.Manifest;
 import android.content.Context;
@@ -22,11 +22,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
+public class SignUpActivity extends AppCompatActivity implements View.OnClickListener {
 
-public class LogInActivity extends AppCompatActivity implements View.OnClickListener {
 
-
-    EditText loginEmail, loginPassword;
+    EditText registerEmail, registerPassword;
 
     LocationManager locationManager;
     LocationListener locationListener;
@@ -35,21 +34,21 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
     String strLong, strLat;
 
     private FirebaseAuth mAuth;
-    boolean loginStatus = false;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_log_in);
+        setContentView(R.layout.activity_sign_up);
 
-        loginEmail = (EditText)findViewById(R.id.editTextLoginEmail);
-        loginPassword = (EditText)findViewById(R.id.editTextLoginPassword);
+        registerEmail = (EditText) findViewById(R.id.editTextRegisterEmail) ;
+        registerPassword = (EditText)findViewById(R.id.editTextRegisterPassword);
 
-        findViewById(R.id.btnLogin).setOnClickListener(this);
-        findViewById(R.id.textViewNotMember).setOnClickListener(this);
+        findViewById(R.id.btnRegister).setOnClickListener(this);
+        findViewById(R.id.textViewAlreadyMember).setOnClickListener(this);
 
         mAuth = FirebaseAuth.getInstance();
+
 
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -61,6 +60,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                 Log.i("GPS-Coordinates", "Lat: " + String.valueOf(latitude) + ", Long: " + String.valueOf(longitude));
                 strLat = String.valueOf(latitude);
                 strLong = String.valueOf(longitude);
+
             }
 
             @Override
@@ -78,8 +78,6 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
 
             }
         };
-
-
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED){
 
@@ -89,49 +87,49 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
         else{
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 100, locationListener);
         }
-
     }
 
 
-    private void userLogin(){
-        String email = loginEmail.getText().toString().trim();
-        String password = loginPassword.getText().toString().trim();
+    private void registerUser(){
+        String email = registerEmail.getText().toString().trim();
+        String password = registerPassword.getText().toString().trim();
 
         if (email.isEmpty()) {
-            loginEmail.setError("Email is required");
-            loginEmail.requestFocus();
+            registerEmail.setError("Email is required");
+            registerEmail.requestFocus();
             return;
         }
         if(!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
-            loginEmail.setError("Not a valid email");
-            loginEmail.requestFocus();
+            registerEmail.setError("Not a valid email");
+            registerEmail.requestFocus();
             return;
         }
         if(password.isEmpty()){
-            loginPassword.setError("Password is required");
-            loginPassword.requestFocus();
+            registerPassword.setError("Password is required");
+            registerPassword.requestFocus();
             return;
         }
         if(password.length() < 6){
-            loginPassword.setError("Password to short");
-            loginPassword.requestFocus();
+            registerPassword.setError("Password to short");
+            registerPassword.requestFocus();
             return;
         }
 
-        mAuth.signInWithEmailAndPassword(email, password)
+
+        mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-
                         if(task.isSuccessful()){
-                            Log.d("Login: ", "login successful");
-                            Toast.makeText(LogInActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-                            loginStatus = true;
+                            //sign in success, update UI with the signed-in user information
+                            Log.d("Sign in Success", "onComplete: Success");
+                            Toast.makeText(SignUpActivity.this, "Authentication Successful", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(SignUpActivity.this, MainActivity.class).putExtra("latitude", strLat).putExtra("longitude", strLong));
                         }
                         else{
-                            Log.d("Login", "Failed to login");
-                            Toast.makeText(LogInActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
-                            loginStatus = false;
+                            //if sign in fails, display a message to the user.
+                            Log.w("createUserWithEmail", "createUserWithEmail: failure" );
+                            Toast.makeText(SignUpActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -139,18 +137,17 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
     }
 
 
+
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
-            case R.id.textViewNotMember:
-                startActivity(new Intent(this, SignUpActivity.class));
+        switch(view.getId()){
+            case R.id.btnRegister:
+                registerUser();
                 break;
-            case R.id.btnLogin:
-                userLogin();
-                if(loginStatus == true)
-                    startActivity(new Intent(this, MainActivity.class).putExtra("latitude", strLat).putExtra("longitude", strLong));
+
+            case R.id.textViewAlreadyMember:
+                startActivity(new Intent(this, LogInActivity.class));
                 break;
         }
-
     }
 }
