@@ -96,6 +96,9 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         changeCityName = changeCityName.replaceAll(" ", "+");
         changeCityName = changeCityName.replaceAll("ö", "o");
         changeCityName = changeCityName.replaceAll("ä","a");
+
+        mDatabase.child(mAuth).child("city1").setValue(changeCityName);
+
         changeCity();
     }
 
