@@ -1,4 +1,4 @@
-package com.example.julijos.weatherapp;
+package com.example.julijos.weatherappAndroid;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

@@ -1,14 +1,23 @@
-package com.example.julijos.weatherapp;
+package com.example.julijos.weatherappAndroid;
 
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,15 +40,25 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
     private String apiCityByCoord = "https://api.openweathermap.org/data/2.5/weather?lat=";//get city by coordinates
 
     String changeCityName ="";
-    String latitude="", longitude="";
+    String latitude="", longitude="", email="";
     String desc = "";
     String cityName = "";
     double tempCelsius;
+
+    String mAuth;
+
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        mAuth = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Log.i("USERID ", "CurrentUser: " + mAuth.toString()   );
+
 
 
         textViewCity = (TextView) findViewById(R.id.textViewCity);
@@ -49,6 +68,10 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         //Loads the coordinaties from the loginActivity & SignupActivity
         latitude = getIntent().getStringExtra("latitude");
         longitude = getIntent().getStringExtra("longitude");
+        email = getIntent().getStringExtra("email");
+        writeNewUser(mAuth, email);
+
+
         Log.i("Coordinates", "onCreate: lon: "+longitude+ ", lat:" + latitude);
 
         DownloadTask task = new DownloadTask();
@@ -64,6 +87,9 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     }
 
+    private void writeNewUser(String userID, String email){
+        mDatabase.child("users").child(userID).setValue(email);
+    }
 
     //Replaces special-charachters (like åäö, and space) in the cityname
     public void applyText(String cityName) {
@@ -75,6 +101,36 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         changeCityName = changeCityName.replaceAll(" ", "+");
         changeCityName = changeCityName.replaceAll("ö", "o");
         changeCityName = changeCityName.replaceAll("ä","a");
+
+
+        ChildEventListener childEventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        }
+        mDatabase.child(mAuth).child("city1").setValue(changeCityName);
+
         changeCity();
     }
 
@@ -198,11 +254,10 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
             Log.i("Website content ", result);
         }
     }
-
-
-
+    
     //firebaselogout
     public void userLogout(View view){
+        FirebaseAuth.getInstance().signOut();
         startActivity(new Intent(this, LogInActivity.class));
     }
     //Opens an Alert Dialog to change to another city

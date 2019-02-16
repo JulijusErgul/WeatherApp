@@ -1,4 +1,4 @@
-package com.example.julijos.weatherapp;
+package com.example.julijos.weatherappAndroid;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -6,17 +6,32 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class AlertDialogChangeCity extends AppCompatDialogFragment {
     private EditText editTextChangeCity;
     private AlertDialogListener listener;
 
+    String currentUserID;
+
+    private DatabaseReference mDatabase;
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        currentUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Log.i("USERID ", "CurrentUser: " + currentUserID.toString());
+
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.layout_changecity, null);
