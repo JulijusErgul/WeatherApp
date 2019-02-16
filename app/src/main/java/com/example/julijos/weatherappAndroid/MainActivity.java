@@ -38,11 +38,15 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
     String cityName = "";
     double tempCelsius;
 
+    String mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mAuth = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Log.i("USERID ", "CurrentUser: " + mAuth.toString()   );
 
 
         textViewCity = (TextView) findViewById(R.id.textViewCity);
@@ -201,9 +205,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
             Log.i("Website content ", result);
         }
     }
-
-
-
+    
     //firebaselogout
     public void userLogout(View view){
         FirebaseAuth.getInstance().signOut();
