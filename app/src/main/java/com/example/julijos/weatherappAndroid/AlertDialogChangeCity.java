@@ -6,17 +6,26 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 public class AlertDialogChangeCity extends AppCompatDialogFragment {
     private EditText editTextChangeCity;
     private AlertDialogListener listener;
 
+    String currentUserID;
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        currentUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Log.i("USERID ", "CurrentUser: " + currentUserID.toString()   );
+
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.layout_changecity, null);

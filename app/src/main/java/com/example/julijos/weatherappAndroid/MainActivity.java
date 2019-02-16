@@ -45,9 +45,9 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mAuth = FirebaseAuth.getInstance().getCurrentUser().getUid();
+       /* mAuth = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Log.i("USERID ", "CurrentUser: " + mAuth.toString()   );
-
+*/
 
         textViewCity = (TextView) findViewById(R.id.textViewCity);
         textViewDesc = (TextView) findViewById(R.id.textViewDesc);
