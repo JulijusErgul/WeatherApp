@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class AlertDialogChangeCity extends AppCompatDialogFragment {
     private EditText editTextChangeCity;
@@ -19,12 +21,16 @@ public class AlertDialogChangeCity extends AppCompatDialogFragment {
 
     String currentUserID;
 
+    private DatabaseReference mDatabase;
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
         currentUserID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        Log.i("USERID ", "CurrentUser: " + currentUserID.toString()   );
+        Log.i("USERID ", "CurrentUser: " + currentUserID.toString());
 
 
         LayoutInflater inflater = getActivity().getLayoutInflater();

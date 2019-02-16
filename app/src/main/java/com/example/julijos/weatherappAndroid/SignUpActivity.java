@@ -91,7 +91,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
 
     private void registerUser(){
-        String email = registerEmail.getText().toString().trim();
+        final String email = registerEmail.getText().toString().trim();
         String password = registerPassword.getText().toString().trim();
 
         if (email.isEmpty()) {
@@ -124,7 +124,10 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                             //sign in success, update UI with the signed-in user information
                             Log.d("Sign in Success", "onComplete: Success");
                             Toast.makeText(SignUpActivity.this, "Authentication Successful", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(SignUpActivity.this, MainActivity.class).putExtra("latitude", strLat).putExtra("longitude", strLong));
+                            startActivity(new Intent(SignUpActivity.this, MainActivity.class)
+                                    .putExtra("latitude", strLat)
+                                    .putExtra("longitude", strLong)
+                                    .putExtra("email", email));
                         }
                         else{
                             //if sign in fails, display a message to the user.

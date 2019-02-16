@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,21 +35,26 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
     private String apiCityByCoord = "https://api.openweathermap.org/data/2.5/weather?lat=";//get city by coordinates
 
     String changeCityName ="";
-    String latitude="", longitude="";
+    String latitude="", longitude="", email="";
     String desc = "";
     String cityName = "";
     double tempCelsius;
 
     String mAuth;
 
+    private DatabaseReference mDatabase;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-       /* mAuth = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        mAuth = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Log.i("USERID ", "CurrentUser: " + mAuth.toString()   );
-*/
+
+
 
         textViewCity = (TextView) findViewById(R.id.textViewCity);
         textViewDesc = (TextView) findViewById(R.id.textViewDesc);
@@ -56,6 +63,10 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         //Loads the coordinaties from the loginActivity & SignupActivity
         latitude = getIntent().getStringExtra("latitude");
         longitude = getIntent().getStringExtra("longitude");
+        email = getIntent().getStringExtra("email");
+        writeNewUser(mAuth, email);
+
+
         Log.i("Coordinates", "onCreate: lon: "+longitude+ ", lat:" + latitude);
 
         DownloadTask task = new DownloadTask();
@@ -71,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
 
     }
 
+    private void writeNewUser(String userID, String email){
+        mDatabase.child("users").child(userID).setValue(email);
+    }
 
     //Replaces special-charachters (like åäö, and space) in the cityname
     public void applyText(String cityName) {

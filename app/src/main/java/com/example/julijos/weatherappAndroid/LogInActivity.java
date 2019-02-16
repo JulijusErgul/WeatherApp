@@ -93,7 +93,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
 
 
     private void userLogin(){
-        String email = loginEmail.getText().toString().trim();
+        final String email = loginEmail.getText().toString().trim();
         String password = loginPassword.getText().toString().trim();
 
         if (email.isEmpty()) {
@@ -125,7 +125,10 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                         if(task.isSuccessful()){
                             Log.d("Login: ", "login successful");
                             Toast.makeText(LogInActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-                             startActivity(new Intent(LogInActivity.this, MainActivity.class).putExtra("latitude", strLat).putExtra("longitude", strLong));
+                             startActivity(new Intent(LogInActivity.this, MainActivity.class)
+                                     .putExtra("latitude", strLat)
+                                     .putExtra("longitude", strLong)
+                                     .putExtra("email", email));
 
                         }
                         else{
