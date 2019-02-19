@@ -4,13 +4,10 @@
     android:padding="16dp">
 
     <EditText
+        android:layout_weight="50"
         android:id="@+id/editText_changeCity"
         android:hint="City name..."
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <ListView
-        android:layout_marginTop="50dp"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"></ListView>
 </RelativeLayout>

@@ -3,19 +3,13 @@ package com.example.julijos.weatherappAndroid;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
@@ -55,24 +49,19 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         setContentView(R.layout.activity_main);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
-
         mAuth = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        Log.i("USERID ", "CurrentUser: " + mAuth.toString()   );
-
-
 
         textViewCity = (TextView) findViewById(R.id.textViewCity);
         textViewDesc = (TextView) findViewById(R.id.textViewDesc);
         textViewTemp = (TextView) findViewById(R.id.textViewTemp);
 
-        //Loads the coordinaties from the loginActivity & SignupActivity
+        //Loads the coordinaties from the loginActivity or SignupActivity
         latitude = getIntent().getStringExtra("latitude");
         longitude = getIntent().getStringExtra("longitude");
         email = getIntent().getStringExtra("email");
+
+        //Adding new user + email to the database
         writeNewUser(mAuth, email);
-
-
-        Log.i("Coordinates", "onCreate: lon: "+longitude+ ", lat:" + latitude);
 
         DownloadTask task = new DownloadTask();
         String result = null;
@@ -94,46 +83,13 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
     //Replaces special-charachters (like åäö, and space) in the cityname
     public void applyText(String cityName) {
         changeCityName = cityName;
-        Log.i("ChangeCity:  ", "applyText: " + cityName);
-        Log.i("UPLOAD TO DATABASE", "databaseReference  " + changeCityName);
         changeCityName = changeCityName.replaceAll("Göteborg", "Gothenburg");
         changeCityName = changeCityName.replaceAll("göteborg", "Gothenburg");
         changeCityName = changeCityName.replaceAll(" ", "+");
         changeCityName = changeCityName.replaceAll("ö", "o");
         changeCityName = changeCityName.replaceAll("ä","a");
-
-
-        ChildEventListener childEventListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        }
-        mDatabase.child(mAuth).child("city1").setValue(changeCityName);
-
         changeCity();
     }
-
 
     //Downloading data from the API Using a Backround Thread
     public class DownloadTask extends AsyncTask<String, Void, String>{
@@ -260,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         FirebaseAuth.getInstance().signOut();
         startActivity(new Intent(this, LogInActivity.class));
     }
+
     //Opens an Alert Dialog to change to another city
     public void changeCityAlertDialog(View view){
         AlertDialogChangeCity alertDialogChangeCity = new AlertDialogChangeCity();
@@ -272,7 +229,6 @@ public class MainActivity extends AppCompatActivity implements AlertDialogChange
         String result = null;
         try {
             result = task.execute(apiChangeCityUrl+changeCityName+"&appid="+apiKey).get();
-
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
