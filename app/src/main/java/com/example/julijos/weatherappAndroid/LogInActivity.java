@@ -25,7 +25,6 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class LogInActivity extends AppCompatActivity implements View.OnClickListener {
 
-
     EditText loginEmail, loginPassword;
 
     LocationManager locationManager;
@@ -35,8 +34,6 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
     String strLong, strLat;
 
     private FirebaseAuth mAuth;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +88,6 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
 
     }
 
-
     private void userLogin(){
         final String email = loginEmail.getText().toString().trim();
         String password = loginPassword.getText().toString().trim();
@@ -123,23 +119,20 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                     public void onComplete(@NonNull Task<AuthResult> task) {
 
                         if(task.isSuccessful()){
-                            Log.d("Login: ", "login successful");
                             Toast.makeText(LogInActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-                             startActivity(new Intent(LogInActivity.this, MainActivity.class)
+                            startActivity(new Intent(LogInActivity.this, MainActivity.class)
                                      .putExtra("latitude", strLat)
                                      .putExtra("longitude", strLong)
                                      .putExtra("email", email));
 
                         }
                         else{
-                            Log.d("Login", "Failed to login");
                             Toast.makeText(LogInActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
 
     }
-
 
     @Override
     public void onClick(View view) {
@@ -151,6 +144,5 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                 userLogin();
                 break;
         }
-
     }
 }
