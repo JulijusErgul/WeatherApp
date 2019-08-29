@@ -23,19 +23,19 @@ public class AlertDialogChangeCity extends AppCompatDialogFragment {
         View view = inflater.inflate(R.layout.layout_changecity, null);
 
         builder.setView(view)
-                .setTitle("Change City")
-                .setMessage("Change to: ")
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.alert_dialog_change_city)
+                .setMessage(R.string.alert_dialog_change_to)
+                .setNegativeButton(R.string.alert_dialog_negative_button, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
                     }
                 })
-                .setPositiveButton("Change", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.alert_dialog_positive_button, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String cityName = editTextChangeCity.getText().toString();
-                        listener.applyText(cityName);
+                        listener.removeSpecialCharacterFromCityName(cityName);
                     }
                 });
         editTextChangeCity = view.findViewById(R.id.editText_changeCity);
@@ -54,6 +54,6 @@ public class AlertDialogChangeCity extends AppCompatDialogFragment {
     }
 
     public interface AlertDialogListener{
-        void applyText(String cityName);
+        void removeSpecialCharacterFromCityName(String cityName);
     }
 }

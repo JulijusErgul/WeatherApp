@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".WeatherActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -59,7 +59,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="25"
-                    android:hint="Email"
+                    android:hint="@string/validation_email_hint"
                     android:inputType="textEmailAddress"/>
 
                 <EditText
@@ -67,7 +67,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="25"
-                    android:hint="Password"
+                    android:hint="@string/validation_password_hint"
                     android:inputType="textPassword"/>
 
                 <Button
@@ -75,14 +75,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
                     android:layout_weight="25"
-                    android:text="Register" />
+                    android:text="@string/button_register" />
                 <TextView
                     android:id="@+id/textViewAlreadyMember"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="15dp"
                     android:layout_weight="25"
-                    android:text="@string/alreadyMember"
+                    android:text="@string/already_member"
                     android:textSize="16sp"
                     android:textAlignment="center"
                     />

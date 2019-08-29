@@ -23,15 +23,30 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class SignUpActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static final String TAG = "SignUpActivity";
+    private static final String LONGITUDE = "Longitude";
+    private static final String LATITUDE = "Latitude";
+    private static final String EMAIL = "Email";
+    private static final String EMAIL_EMPTY ="Email is required";
+    private static final String NOT_VALID_EMAIL = "Email is not in valid format";
+    private static final String PASSWORD_EMPTY = "Password is required";
+    private static final String PASSWORD_SHORT = "Password must be atleat 6 charachters";
+
     EditText registerEmail, registerPassword;
 
     LocationManager locationManager;
     LocationListener locationListener;
 
     double longitude, latitude;
-    String strLong, strLat;
+    String strLongitude, strLatitude;
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth firebaseAuthentication;
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(locationListener);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +59,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         findViewById(R.id.btnRegister).setOnClickListener(this);
         findViewById(R.id.textViewAlreadyMember).setOnClickListener(this);
 
-        mAuth = FirebaseAuth.getInstance();
+        firebaseAuthentication = FirebaseAuth.getInstance();
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -52,8 +67,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
             public void onLocationChanged(Location location) {
                 longitude = location.getLongitude();
                 latitude = location.getLatitude();
-                strLat = String.valueOf(latitude);
-                strLong = String.valueOf(longitude);
+                strLatitude = String.valueOf(latitude);
+                strLongitude = String.valueOf(longitude);
             }
 
             @Override
@@ -72,6 +87,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
             }
         };
 
+
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
@@ -86,40 +102,43 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         String password = registerPassword.getText().toString().trim();
 
         if (email.isEmpty()) {
-            registerEmail.setError("Email is required");
+            registerEmail.setError(EMAIL_EMPTY);
             registerEmail.requestFocus();
             return;
         }
+
         if(!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
-            registerEmail.setError("Not a valid email");
+            registerEmail.setError(NOT_VALID_EMAIL);
             registerEmail.requestFocus();
             return;
         }
+
         if(password.isEmpty()){
-            registerPassword.setError("Password is required");
-            registerPassword.requestFocus();
-            return;
-        }
-        if(password.length() < 6){
-            registerPassword.setError("Password to short");
+            registerPassword.setError(PASSWORD_EMPTY);
             registerPassword.requestFocus();
             return;
         }
 
-        mAuth.createUserWithEmailAndPassword(email, password)
+        if(password.length() < 6){
+            registerPassword.setError(PASSWORD_SHORT);
+            registerPassword.requestFocus();
+            return;
+        }
+
+        firebaseAuthentication.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
-                            Toast.makeText(SignUpActivity.this, "Authentication Successful", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(SignUpActivity.this, MainActivity.class)
-                                    .putExtra("latitude", strLat)
-                                    .putExtra("longitude", strLong)
-                                    .putExtra("email", email));
+                            Toast.makeText(SignUpActivity.this, R.string.register_successful, Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(SignUpActivity.this, WeatherActivity.class)
+                                    .putExtra(LATITUDE, strLatitude)
+                                    .putExtra(LONGITUDE, strLongitude)
+                                    .putExtra(EMAIL, email));
                         }
                         else{
                             //if sign in fails, display a message to the user.
-                            Toast.makeText(SignUpActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignUpActivity.this, R.string.register_failure, Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

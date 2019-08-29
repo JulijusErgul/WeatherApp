@@ -21,7 +21,8 @@
             </intent-filter>
         </activity>
         <activity android:name="com.example.julijos.weatherappAndroid.SignUpActivity"></activity>
-        <activity android:name="com.example.julijos.weatherappAndroid.MainActivity"/>
+        <activity android:name="com.example.julijos.weatherappAndroid.WeatherActivity"/>
+        <activity android:name=".FavoriteCityRecyclerViewAdapter" />
     </application>
 
 </manifest>

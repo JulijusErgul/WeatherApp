@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="5dp"
+    android:padding="5dp"
+    android:id="@+id/recycler_view_layout"
+    android:background="@color/colorPrimary"
+    >
+
+    <TextView
+        android:id="@+id/rec_view_fav_city_name_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/weather_icon_from_favorites_image"
+        android:layout_marginStart="12dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="6dp"
+        android:text="cityName"
+        android:textColor="#fff"
+        android:textSize="20sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="34dp"
+        android:id="@+id/rec_view_fav_city_temp_text_view"
+        android:layout_alignTop="@+id/rec_view_fav_city_name_text_view"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:text="24 C"
+        android:textSize="20sp"
+        android:textColor="#fff"
+        android:layout_marginStart="243dp"
+        android:layout_marginLeft="243dp"
+        android:layout_marginTop="1dp" />
+
+    <ImageView
+        android:id="@+id/weather_icon_from_favorites_image"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="20dp"
+        android:src="@drawable/noweather" />
+
+</RelativeLayout>

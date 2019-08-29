@@ -1,6 +1,49 @@
 <resources>
     <string name="app_name">WeatherApp</string>
-    <string name="textViewPrevCities">Latest cities</string>
-    <string name="notMember">Not a member yet? Click here</string>
-    <string name="alreadyMember">Already a member? Login here</string>
+    <string name="textview_previous_cities">Latest cities</string>
+    <string name="not_member_yet">Not a member yet? Click here</string>
+    <string name="already_member">Already a member? Login here</string>
+
+    <string name="coordinate_longitude">Longitude</string>
+    <string name="coordinate_latitude">Latitude</string>
+
+    <string name="validation_email_required">Email is required!</string>
+    <string name="validation_email_wrong_format">Wrong format on email!</string>
+    <string name="validation_pwd_required">Password is required!</string>
+    <string name="validation_pwd_not_six_charachters">Password must be atleast 6 characters</string>
+    <string name="validation_email_hint">Email</string>
+    <string name="validation_password_hint">Password</string>
+
+    <string name="button_login">Login</string>
+    <string name="button_register">Register</string>
+    <string name="button_change_city">Change city</string>
+    <string name="button_logout">Logout</string>
+    <string name="button_add_favorite">Add to Favorites</string>
+    <string name="button_delete_favorite">Delete from Favorites</string>
+
+    <string name="weather_no_temp">NO TEMP FOUND</string>
+    <string name="weather_no_city">NO CITY FOUND</string>
+    <string name="weather_no_description">NO DESCRIPTION FOUND</string>
+
+
+    <string name="login_successful">Login Successful</string>
+    <string name="login_failure">Login Failed</string>
+
+    <string name="register_successful">Register Successful</string>
+    <string name="register_failure">Register Failed</string>
+
+    <string name="api_openWeatherMap_api_key">5ffcfd078c6933d6a3e7eb281727fa75</string>
+    <string name="api_openWeatherMap_change_city_url">https://api.openweathermap.org/data/2.5/weather?q=</string>
+    <string name="api_openWeatherMap_by_coordinates_url">https://api.openweathermap.org/data/2.5/weather?lat=</string>
+    <string name="url_content">URL CONTENTS</string>
+
+    <string name="alert_dialog_change_city">Change City</string>
+    <string name="alert_dialog_change_to">Change to:</string>
+    <string name="alert_dialog_positive_button">Change</string>
+    <string name="alert_dialog_negative_button">Cancel</string>
+
+    <string name="alert_dialog_remove_favorite_title">Delete</string>
+    <string name="alert_dialog_remove_favorite_message">Do you want to remove this city from your favorites?</string>
+    <string name="alert_dialog_remove_favorite_positive_button">Delete</string>
+    <string name="alert_dialog_remove_favorite_negative_button">Cancel</string>
 </resources>
