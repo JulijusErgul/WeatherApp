@@ -56,8 +56,6 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, final int i) {
         Log.d(TAG, "onBindViewHolder: called");
-
-        //Glide.with(context).load(weatherIcons.get(i)).into(viewHolder.weatherIcon);
         viewHolder.cityName.setText(cityNames.get(i));
         viewHolder.temperature.setText(cityTemps.get(i));
 
@@ -74,32 +72,27 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
             else {
                 if (icons.contains(iconId)) {
                     String uri = "drawable/" + iconId;
-
-                    //int imageResource = R.drawable.icon;
-                    int imageResource = context.getResources().getIdentifier(uri, null, "com.example.julijos.weatherappAndroid");
-
-                    //ImageView imageView = (ImageView) viewHolder.findViewById(R.id.imageViewWeateherIcon);
+                    int imageResource = context.getResources()
+                            .getIdentifier(uri, null, "com.example.julijos.weatherappAndroid");
                     Drawable image = context.getResources().getDrawable(imageResource);
                     weatherIcon.setImageDrawable(image);
-                    //Picasso.get().load(R.drawable.)
                 } else {
                     Picasso.get().load(R.drawable.noweather).into(weatherIcon);
                 }
             }
         }
-        //weatherIcon.setImageResource(R.drawable.round_delete_black_18);
 
-        viewHolder.favoriteListLayout.setOnClickListener(new View.OnClickListener() {
+        /*viewHolder.favoriteListLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "onClick: clicked on " + cityNames.get(i));
                 Toast.makeText(context, cityNames.get(i), Toast.LENGTH_SHORT).show();
-                /*Intent intent = new Intent(context, WeatherActivity.class);
-                //intent.putExtra("cityName", cityNames.get(i));
-                //intent.putExtra("id", i);
-                context.startActivity(intent);*/
+                Intent intent = new Intent(context, WeatherActivity.class);
+                intent.putExtra("cityName", cityNames.get(i));
+                intent.putExtra("id", i);
+                context.startActivity(intent);
             }
-        });
+        });*/
         viewHolder.favoriteListLayout.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -112,7 +105,7 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
 
     }
 
-    // onLong click an alert dialog should show, asking the user if he wants to
+    // onLongclick should display an alert dialog, asking the user if he wants to
     // delete the current object.
     private void showDeleteAlertDialog(final int i){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -149,7 +142,6 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
         weatherIcons.remove(i);
         Intent intent = new Intent(context, WeatherActivity.class);
         context.startActivity(intent);
-        //notifyDataSetChanged();
     }
 
     @Override
