@@ -23,7 +23,7 @@ import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
 
-public class MainActivity extends AppCompatActivity implements AlertDialogChangeCity.AlertDialogListener{
+public abstract class MainActivity extends AppCompatActivity implements AlertDialogChangeCity.AlertDialogListener{
 
     ImageView imageViewIcon;
     TextView textViewCity, textViewDesc, textViewTemp;
