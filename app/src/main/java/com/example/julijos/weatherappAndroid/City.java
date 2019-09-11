@@ -4,9 +4,7 @@ public class City {
     private String name;
     private String iconId;
     private String description;
-    private double temperature;
-    private String longitude;
-    private String latitude;
+    private String temperature;
 
     public City() {
     }
@@ -35,27 +33,12 @@ public class City {
         this.description = description;
     }
 
-    public double getTemperature() {
+    public String getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(int temperature) {
+    public void setTemperature(String temperature) {
         this.temperature = temperature;
     }
 
-    public String getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
-    }
-
-    public String getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
-    }
 }

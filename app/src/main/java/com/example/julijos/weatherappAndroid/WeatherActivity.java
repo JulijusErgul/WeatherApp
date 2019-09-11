@@ -1,6 +1,7 @@
 package com.example.julijos.weatherappAndroid;
 
 
+import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,15 +46,16 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
     private static final String TEMPERATURE = "temp";
     private boolean favorite = false;
 
-
     private ImageView imageViewIcon, imageViewAddToFavorites;
     private TextView textViewCity, textViewDesc, textViewTemp;
+
+    private City city = new City();
 
     private String changeCityName ="";
     private String latitude="", longitude="", email="";
     private String desc = "";
     private String cityName = "";
-    double tempCelsius;
+    int tempCelsius;
 
     private FavoriteCityRecyclerViewAdapter adapter;
 
@@ -60,7 +63,6 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
 
     private DatabaseReference databaseReference;
     private String icon;
-
     private ArrayList<String> cityNames;
     private ArrayList<String> cityTemps;
     private ArrayList<String> weatherIcons;
@@ -68,18 +70,18 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.actionbar_menu, menu);
-
         return super.onCreateOptionsMenu(menu);
-
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
-
+      /*  if(FirebaseAuth.getInstance().getCurrentUser() == null){
+            MenuItem menuItem = (MenuItem) findViewById(R.id.logout_item);
+            menuItem.setTitle("Login");
+        }*/
         switch (item.getItemId()){
             case R.id.logout_item:
                 userLogout();
@@ -105,10 +107,11 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         cityTemps = new ArrayList<String>();
         weatherIcons = new ArrayList<String>();
 
-        databaseReference = FirebaseDatabase.getInstance().getReference();
-        firebaseAuthentication = FirebaseAuth.getInstance().getCurrentUser().getUid().toString();
-        readDataFromDatabase();
-        
+        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+            databaseReference = FirebaseDatabase.getInstance().getReference();
+            firebaseAuthentication = FirebaseAuth.getInstance().getCurrentUser().getUid().toString();
+            readDataFromDatabase();
+        }
         textViewCity = (TextView) findViewById(R.id.textViewCity);
         textViewDesc = (TextView) findViewById(R.id.textViewDesc);
         textViewTemp = (TextView) findViewById(R.id.textViewTemp);
@@ -129,20 +132,6 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         }
         Log.i(TAG,"Contents of URL " +  result);
 
-        getIntentExtras();
-    }
-
-    //checks if there is any intent extra
-    private void getIntentExtras(){
-        if(getIntent().hasExtra("cityName")){
-            String cName = getIntent().getStringExtra("cityName");
-            setIntentExtra(cName);
-        }
-    }
-
-    // If there is any intent extras then set this.
-    private void setIntentExtra(String cityName){
-        removeSpecialCharacterFromCityName(cityName);
     }
 
     //Replaces special-charachters (like åäö, and space) in the cityname
@@ -181,7 +170,6 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
 
                     data = reader.read();
                 }
-
                 JSONObject jsonObject = new JSONObject(result);
                 String weatherInfo = jsonObject.getString(WEATHER);
                 JSONObject jsonPart = null;
@@ -191,18 +179,23 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
                     jsonPart = array.getJSONObject(i);
                     icon = jsonPart.getString(ICON);
 
-                    if(favorite)
+                    if(favorite) {
                         weatherIcons.add(icon);
-
+                        city.setIconId(icon);
+                    }
                     Log.i("iconID", "onPostExecute: " + icon);
                     desc = jsonPart.getString(DESCRIPTION);
+                    city.setDescription(desc);
                 }
                 JSONObject main = jsonObject.getJSONObject("main");
-                double tempKelvin = main.getInt(TEMPERATURE);
+                int tempKelvin = main.getInt(TEMPERATURE);
                 tempCelsius = tempKelvin-273;
+                city.setTemperature(String.valueOf(tempCelsius)+ " °C");
                 cityName = jsonObject.getString("name");
+                city.setName(cityName);
                 if(favorite){
                     cityTemps.add(String.valueOf(tempCelsius)+ " °C");
+                    city.setTemperature(String.valueOf(tempCelsius)+ " °C");
                     Log.d(TAG, "doInBackground: citytemps:" + tempCelsius);
                 }
 
@@ -217,23 +210,18 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-
             try {
-
                 if (cityName != "" && String.valueOf(tempCelsius) != "" && desc != "") {
                     imageViewIcon = findViewById(R.id.imageViewWeateherIcon);
-                    //Log.i("if-Sats", cityName + String.valueOf(tempCelsius) + desc);
-                    textViewCity.setText(cityName.toUpperCase());
-                    textViewDesc.setText(desc.toUpperCase());
-                    textViewTemp.setText(String.valueOf(tempCelsius) + "°C");
-                    //String iconURL = "http://openweathermap.org/img/wn/"+ icon +"@2x.png&appid=5ffcfd078c6933d6a3e7eb281727fa75";
+                    textViewCity.setText(city.getName());
+                    textViewDesc.setText(city.getDescription());
+                    textViewTemp.setText(city.getTemperature());
                     Log.i("Icon URL", "onPostExecute: " + icon);
                     if(favorite){
                         cityTemps.add(String.valueOf(tempCelsius) + "°C");
                         weatherIcons.add(icon);
                     }
                     showWeatherIcon(icon);
-
                 }
             }catch (Exception e){
 
@@ -242,7 +230,7 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         }
     }
 
-    // Background thread to douwnload the weather information
+    // Background thread to douwnload the weather information to the recyclerview
     public class DownloadCityListInformationTask extends AsyncTask<String, Void, String>{
 
         @Override
@@ -250,7 +238,7 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
             String result = "";
             URL url;
             HttpURLConnection httpURLConnection = null;
-
+            City newCity = new City();
             try{
                 url = new URL(urls[0]);
                 httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -277,15 +265,14 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
                 for(int i = 0 ; i < array.length(); i++){
                     jsonPart = array.getJSONObject(i);
                     icon = jsonPart.getString(ICON);
-
-                    if(favorite)
+                    if(favorite) {
                         weatherIcons.add(icon);
-
+                    }
                     Log.i("iconID", "onPostExecute: " + icon);
                     desc = jsonPart.getString(DESCRIPTION);
                 }
                 JSONObject main = jsonObject.getJSONObject("main");
-                double tempKelvin = main.getInt(TEMPERATURE);
+                int tempKelvin = main.getInt(TEMPERATURE);
                 tempCelsius = tempKelvin-273;
                 cityName = jsonObject.getString("name");
                 if(favorite){
@@ -308,7 +295,6 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
             try {
 
                 if (cityName != "" && String.valueOf(tempCelsius) != "" && desc != "") {
-                    //String iconURL = "http://openweathermap.org/img/wn/"+ icon +"@2x.png&appid=5ffcfd078c6933d6a3e7eb281727fa75";
                     Log.i("Icon URL", "onPostExecute: " + icon);
                     if(favorite){
                         cityTemps.add(String.valueOf(tempCelsius) + "°C");
@@ -336,14 +322,10 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         else{
             if(icons.contains(iconId)){
                 String uri = "drawable/"+iconId;
-
-                // int imageResource = R.drawable.icon;
                 int imageResource = getResources().getIdentifier(uri, null, getPackageName());
-
                 ImageView imageView = (ImageView) findViewById(R.id.imageViewWeateherIcon);
                 Drawable image = getResources().getDrawable(imageResource);
                 imageView.setImageDrawable(image);
-                //Picasso.get().load(R.drawable.)
             }
             else{
                 Picasso.get().load(R.drawable.noweather).into(imageViewIcon);
@@ -355,6 +337,18 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
     public void addCityToFavorites(String userID, String cityName) {
         cityNames.add(cityName);
         databaseReference.child("users").child(userID).child("cities").child(cityName).setValue(cityName);
+        //notifyAll();
+        readDataFromDatabase();
+        DownloadCityInformationTask task = new DownloadCityInformationTask();
+        String result = null;
+        try {
+            result = task.execute("https://api.openweathermap.org/data/2.5/weather?lat="+latitude+"&lon="+longitude+"&appid="+"5ffcfd078c6933d6a3e7eb281727fa75").get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Log.i(TAG,"Contents of URL " +  result);
     }
 
     // Load data from the database and sets it to the list.

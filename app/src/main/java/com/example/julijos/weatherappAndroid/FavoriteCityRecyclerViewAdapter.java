@@ -82,17 +82,6 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
             }
         }
 
-        /*viewHolder.favoriteListLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: clicked on " + cityNames.get(i));
-                Toast.makeText(context, cityNames.get(i), Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(context, WeatherActivity.class);
-                intent.putExtra("cityName", cityNames.get(i));
-                intent.putExtra("id", i);
-                context.startActivity(intent);
-            }
-        });*/
         viewHolder.favoriteListLayout.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
