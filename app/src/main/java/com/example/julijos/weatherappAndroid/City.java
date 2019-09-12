@@ -41,4 +41,5 @@ public class City {
         this.temperature = temperature;
     }
 
+
 }

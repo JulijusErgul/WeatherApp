@@ -2,15 +2,16 @@ package com.example.julijos.weatherappAndroid;
 
 
 import android.Manifest;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -21,7 +22,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,11 +30,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -113,7 +116,11 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
                 changeCityAlertDialog();
                 break;
             case R.id.add_to_favorites_item:
-                addCityToFavorites(firebaseAuthentication, cityName);
+                if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    addCityToFavoritesDB(firebaseAuthentication, cityName);
+                }else{
+                    addCityToFavoritesSharedPrefs(cityNames);
+                }
                 break;
             default:
                 return false;
@@ -127,6 +134,8 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         Log.d(TAG, "onCreate: start");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
+
+
 
         cityNames = new ArrayList<String>();
         cityTemps = new ArrayList<String>();
@@ -174,6 +183,9 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
             firebaseAuthentication = FirebaseAuth.getInstance().getCurrentUser().getUid().toString();
             readDataFromDatabase();
         }
+        else{
+            cityNames = getArrayList();
+        }
         textViewCity = (TextView) findViewById(R.id.textViewCity);
         textViewDesc = (TextView) findViewById(R.id.textViewDesc);
         textViewTemp = (TextView) findViewById(R.id.textViewTemp);
@@ -189,7 +201,30 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         }
         Log.i(TAG,"Contents of URL " +  result);
 
+        downloadDataFromCityNames();
         Log.d(TAG, "onCreate: lämnar");
+    }
+
+    private void downloadDataFromCityNames() {
+        if(cityNames != null){
+            for(int i = 0; i < cityNames.size(); i++){
+                Log.i(TAG, "onCreate: citynames: " + cityNames.get(i));
+                favorite = true;
+                DownloadCityListInformationTask taskList = new DownloadCityListInformationTask();
+                String resultList = null;
+                try {
+                    resultList = taskList.execute("https://api.openweathermap.org/data/2.5/weather?q="+cityNames.get(i)+"&appid="+"5ffcfd078c6933d6a3e7eb281727fa75").get();
+                } catch (ExecutionException e) {
+                    Log.e(TAG, "onDataChange: error",e );
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "onDataChange: error",e );
+                    e.printStackTrace();
+                }
+                Log.i("Contents of URL ", resultList);
+            }
+            initializeFavoriteCityRecyclerView();
+        }
     }
 
     @Override
@@ -263,6 +298,10 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
                 city.setTemperature(String.valueOf(tempCelsius)+ " °C");
                 cityName = jsonObject.getString("name");
                 city.setName(cityName);
+                if(cityNames == null){
+                    cityNames = new ArrayList<String>();
+                }
+                cityNames.add(cityName);
                 if(favorite){
                     cityTemps.add(String.valueOf(tempCelsius)+ " °C");
                     city.setTemperature(String.valueOf(tempCelsius)+ " °C");
@@ -417,29 +456,49 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
     }
 
     // Adds city to list of favorite cities
-    public void addCityToFavorites(String userID, String cityName) {
-        Log.d(TAG, "addCityToFavorites: start");
+    public void addCityToFavoritesDB(String userID, String cityName) {
+        Log.d(TAG, "addCityToFavoritesDB: start");
         cityNames.add(cityName);
         databaseReference.child("users").child(userID).child("cities").child(cityName).setValue(cityName);
-        //notifyAll();
         readDataFromDatabase();
         DownloadCityInformationTask task = new DownloadCityInformationTask();
         String result = null;
         try {
-            Log.i(TAG, "addCityToFavorites: try: start");
+            Log.i(TAG, "addCityToFavoritesDB: try: start");
             result = task.execute("https://api.openweathermap.org/data/2.5/weather?lat="+latitude+"&lon="+longitude+"&appid="+"5ffcfd078c6933d6a3e7eb281727fa75").get();
-            Log.i(TAG, "addCityToFavorites: try: lämnar");
+            Log.i(TAG, "addCityToFavoritesDB: try: lämnar");
         } catch (ExecutionException e) {
-            Log.i(TAG, "addCityToFavorites: catch: start");
+            Log.i(TAG, "addCityToFavoritesDB: catch: start");
             e.printStackTrace();
-            Log.i(TAG, "addCityToFavorites: catch: lämnar");
+            Log.i(TAG, "addCityToFavoritesDB: catch: lämnar");
         } catch (InterruptedException e) {
-            Log.i(TAG, "addCityToFavorites: catch: start");
+            Log.i(TAG, "addCityToFavoritesDB: catch: start");
             e.printStackTrace();
-            Log.i(TAG, "addCityToFavorites: catch: lämnar");
+            Log.i(TAG, "addCityToFavoritesDB: catch: lämnar");
         }
         Log.i(TAG,"Contents of URL " +  result);
-        Log.d(TAG, "addCityToFavorites: lämnar");
+        Log.d(TAG, "addCityToFavoritesDB: lämnar");
+    }
+
+    public void addCityToFavoritesSharedPrefs(ArrayList<String> cityNames){
+        saveCityArrayList(cityNames);
+    }
+
+    public void saveCityArrayList(ArrayList<String> arrayList){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(arrayList);
+        editor.putString("cities",json);
+        editor.apply();
+    }
+
+    public ArrayList<String> getArrayList(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Gson gson = new Gson();
+        String json = prefs.getString("cities", null);
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        return gson.fromJson(json, type);
     }
 
     // Load data from the database and sets it to the list.

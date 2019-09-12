@@ -104,7 +104,12 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
             public void onClick(DialogInterface dialog, int id) {
                 // User clicked OK button
                 Toast.makeText(context, "itemDeleted " + cityNames.get(i), Toast.LENGTH_SHORT).show();
-                deleteFavorite(i);
+                if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    deleteFavoriteFromDB(i);
+                }
+                else{
+                    deleteFavoriteFromSharedPrefs(i);
+                }
             }
         });
         builder.setNegativeButton(R.string.alert_dialog_remove_favorite_negative_button, new DialogInterface.OnClickListener() {
@@ -118,8 +123,7 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
     }
 
     // Removes favorite city from list and from firebase database
-    private void deleteFavorite(int i) {
-
+    private void deleteFavoriteFromDB(int i) {
         databaseReference = FirebaseDatabase.getInstance()
                 .getReference("users")
                 .child(firebaseAuthentication)
@@ -132,6 +136,17 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
         Intent intent = new Intent(context, WeatherActivity.class);
         context.startActivity(intent);
     }
+
+    private void deleteFavoriteFromSharedPrefs(int i){
+        cityNames.remove(i);
+        cityTemps.remove(i);
+        weatherIcons.remove(i);
+        // måste spara dessa listor i shared prefs
+        Intent intent = new Intent(context, WeatherActivity.class);
+        context.startActivity(intent);
+    }
+
+
 
     @Override
     public int getItemCount() {
@@ -147,7 +162,9 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            firebaseAuthentication = FirebaseAuth.getInstance().getCurrentUser().getUid().toString();
+            if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+                firebaseAuthentication = FirebaseAuth.getInstance().getCurrentUser().getUid().toString();
+            }
             favoriteListLayout = itemView.findViewById(R.id.recycler_view_layout);
             cityName = itemView.findViewById(R.id.rec_view_fav_city_name_text_view);
             temperature = itemView.findViewById(R.id.rec_view_fav_city_temp_text_view);
