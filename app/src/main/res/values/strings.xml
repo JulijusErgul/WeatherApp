@@ -17,6 +17,7 @@
     <string name="button_login">Login</string>
     <string name="button_register">Register</string>
     <string name="button_change_city">Change city</string>
+    <string name="button_login_action_menu">Login</string>
     <string name="button_logout">Logout</string>
     <string name="button_add_favorite">Add to Favorites</string>
     <string name="button_delete_favorite">Delete from Favorites</string>

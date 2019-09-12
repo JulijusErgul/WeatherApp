@@ -5,13 +5,16 @@
         android:title="@string/button_change_city"
         android:id="@+id/changeCity_item">
     </item>
-
     <item
         android:id="@+id/add_to_favorites_item"
         android:title="@string/button_add_favorite">
     </item>
     <item
+        android:title="@string/button_login_action_menu"
+        android:id="@+id/login_item">
+    </item>
+    <item
         android:title="@string/button_logout"
-        android:id="@+id/logout_item"
-        />
+        android:id="@+id/logout_item">
+    </item>
 </menu>
