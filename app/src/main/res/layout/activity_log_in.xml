@@ -58,34 +58,72 @@
                     android:id="@+id/editTextLoginEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="25"
+                    android:layout_weight="20"
                     android:hint="@string/validation_email_hint"
-                    android:inputType="textEmailAddress"/>
+                    android:inputType="textEmailAddress" />
 
                 <EditText
                     android:id="@+id/editTextLoginPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="25"
+                    android:layout_weight="20"
                     android:hint="@string/validation_password_hint"
-                    android:inputType="textPassword"/>
+                    android:inputType="textPassword" />
 
                 <Button
                     android:id="@+id/btnLogin"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="20dp"
-                    android:layout_weight="25"
+                    android:layout_weight="20"
                     android:text="@string/button_login" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="10">
+
+                    <CheckBox
+                        android:id="@+id/keepUserLoggedInCheckBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="25dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_weight="85"
+                        android:paddingTop="15dp"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/textKeepUserLoggedIn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="15"
+                        android:text="@string/keep_user_logged_in"
+                        android:textSize="16sp" />
+
+                </LinearLayout>
+
                 <TextView
                     android:id="@+id/textViewNotMember"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="15dp"
+                    android:layout_weight="20"
                     android:paddingTop="15dp"
-                    android:layout_weight="25"
                     android:text="@string/not_member_yet"
-                    android:textSize="16sp"
                     android:textAlignment="center"
-                    />
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/continueWithoutLoginIn"
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"
+                    android:layout_weight="20"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingTop="10dp"
+                    android:text="@string/continue_without_login"
+                    android:textAlignment="center"
+                    android:textSize="16sp" />
+
             </LinearLayout>
             <ProgressBar
                 android:id="@+id/loginProgressBar"

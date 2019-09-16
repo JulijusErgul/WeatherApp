@@ -2,6 +2,8 @@
     <string name="app_name">WeatherApp</string>
     <string name="textview_previous_cities">Latest cities</string>
     <string name="not_member_yet">Not a member yet? Click here</string>
+    <string name="keep_user_logged_in">Stay logged in</string>
+    <string name="continue_without_login">Continue without login in</string>
     <string name="already_member">Already a member? Login here</string>
 
     <string name="coordinate_longitude">Longitude</string>
@@ -17,6 +19,7 @@
     <string name="button_login">Login</string>
     <string name="button_register">Register</string>
     <string name="button_change_city">Change city</string>
+    <string name="button_login_action_menu">Login</string>
     <string name="button_logout">Logout</string>
     <string name="button_add_favorite">Add to Favorites</string>
     <string name="button_delete_favorite">Delete from Favorites</string>
