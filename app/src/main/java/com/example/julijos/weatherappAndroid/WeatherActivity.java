@@ -75,9 +75,7 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
     private ArrayList<String> cityNames;
     private ArrayList<String> cityTemps;
     private ArrayList<String> weatherIcons;
-    private LocationManager locationManager;
-    private LocationListener locationListener;
-    double longitude, latitude;
+    private ArrayList<City> cityArrayList;
     String strLongitude, strLatitude;
 
     @Override
@@ -119,7 +117,7 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
                 if(FirebaseAuth.getInstance().getCurrentUser() != null) {
                     addCityToFavoritesDB(firebaseAuthentication, cityName);
                 }else{
-                    addCityToFavoritesSharedPrefs(cityNames);
+                    addCityToFavoritesSharedPrefs();
                 }
                 break;
             default:
@@ -135,48 +133,14 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
 
-
+        if(getIntent().hasExtra("Longitude")  ){
+            strLongitude = getIntent().getStringExtra("Longitude");
+            strLatitude = getIntent().getStringExtra("Latitude");
+        }
 
         cityNames = new ArrayList<String>();
         cityTemps = new ArrayList<String>();
         weatherIcons = new ArrayList<String>();
-
-        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                longitude = location.getLongitude();
-                latitude = location.getLatitude();
-                Log.i("GPS-Coordinates", R.string.coordinate_latitude + String.valueOf(latitude) + ", " + R.string.coordinate_longitude + String.valueOf(longitude));
-                strLatitude = String.valueOf(latitude);
-                strLongitude = String.valueOf(longitude);
-            }
-
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String s) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String s) {
-
-            }
-        };
-
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED){
-
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
-
-        }
-        else{
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 100, locationListener);
-        }
 
         if(FirebaseAuth.getInstance().getCurrentUser() != null) {
             databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -184,26 +148,46 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
             readDataFromDatabase();
         }
         else{
-            cityNames = getArrayList();
+            cityNames.clear();
+            cityTemps.clear();
+            weatherIcons.clear();
+            cityNames = getArrayList("cityNames");
+            if(cityTemps != null) {
+                downloadDataFromCityNames();
+                initializeFavoriteCityRecyclerView();
+            }else{
+                cityNames = new ArrayList<String>();
+                cityTemps = new ArrayList<String>();
+                weatherIcons = new ArrayList<String>();
+            }
         }
         textViewCity = (TextView) findViewById(R.id.textViewCity);
         textViewDesc = (TextView) findViewById(R.id.textViewDesc);
         textViewTemp = (TextView) findViewById(R.id.textViewTemp);
 
+        //downloads the content for the main city that is shown in the activity
+        downloadCityInformation();
+        //downloads the content for the recyclerview
+        downloadDataFromCityNames();
+
+        Log.d(TAG, "onCreate: lämnar");
+    }
+
+    private void downloadCityInformation() {
         DownloadCityInformationTask task = new DownloadCityInformationTask();
         String result = null;
         try {
-            result = task.execute("https://api.openweathermap.org/data/2.5/weather?lat="+latitude+"&lon="+longitude+"&appid="+"5ffcfd078c6933d6a3e7eb281727fa75").get();
+            result = task.execute("https://api.openweathermap.org/data/2.5/weather?lat="+strLatitude+"&lon="+strLongitude+"&appid="+"5ffcfd078c6933d6a3e7eb281727fa75").get();
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         Log.i(TAG,"Contents of URL " +  result);
-
-        downloadDataFromCityNames();
-        Log.d(TAG, "onCreate: lämnar");
     }
+
+
+
 
     private void downloadDataFromCityNames() {
         if(cityNames != null){
@@ -225,14 +209,6 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
             }
             initializeFavoriteCityRecyclerView();
         }
-    }
-
-    @Override
-    protected void onPause() {
-        Log.d(TAG, "onPause: start");
-        super.onPause();
-        locationManager.removeUpdates(locationListener);
-        Log.d(TAG, "onPause: lämnar");
     }
 
     //Replaces special-charachters (like åäö, and space) in the cityname
@@ -261,18 +237,13 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
                 Log.i(TAG, "doInBackground: try: start");
                 url = new URL(urls[0]);
                 httpURLConnection = (HttpURLConnection) url.openConnection();
-
                 InputStream in = httpURLConnection.getInputStream();
-
                 InputStreamReader reader = new InputStreamReader(in);
-
                 int data = reader.read();
 
                 while (data != -1){
                     char current = (char) data;
-
                     result += current;
-
                     data = reader.read();
                 }
                 JSONObject jsonObject = new JSONObject(result);
@@ -283,30 +254,18 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
                 for(int i = 0 ; i < array.length(); i++){
                     jsonPart = array.getJSONObject(i);
                     icon = jsonPart.getString(ICON);
-
-                    if(favorite) {
-                        weatherIcons.add(icon);
-                        city.setIconId(icon);
-                    }
                     Log.i("iconID", "onPostExecute: " + icon);
                     desc = jsonPart.getString(DESCRIPTION);
-                    city.setDescription(desc);
+
                 }
                 JSONObject main = jsonObject.getJSONObject("main");
                 int tempKelvin = main.getInt(TEMPERATURE);
                 tempCelsius = tempKelvin-273;
-                city.setTemperature(String.valueOf(tempCelsius)+ " °C");
                 cityName = jsonObject.getString("name");
-                city.setName(cityName);
-                if(cityNames == null){
-                    cityNames = new ArrayList<String>();
-                }
-                cityNames.add(cityName);
-                if(favorite){
-                    cityTemps.add(String.valueOf(tempCelsius)+ " °C");
-                    city.setTemperature(String.valueOf(tempCelsius)+ " °C");
-                    Log.d(TAG, "doInBackground: citytemps:" + tempCelsius);
-                }
+                textViewCity.setText(cityName);
+                textViewDesc.setText(desc);
+                textViewTemp.setText(String.valueOf(tempCelsius)+ " °C");
+                showWeatherIcon(icon);
                 Log.i(TAG, "doInBackground: try: lämnar");
                 return result;
             }
@@ -324,18 +283,9 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
             super.onPostExecute(result);
             try {
                 Log.d(TAG, "onPostExecute: try: start");
-                if (cityName != "" && String.valueOf(tempCelsius) != "" && desc != "") {
-                    imageViewIcon = findViewById(R.id.imageViewWeateherIcon);
-                    textViewCity.setText(city.getName());
-                    textViewDesc.setText(city.getDescription());
-                    textViewTemp.setText(city.getTemperature());
-                    Log.i("Icon URL", "onPostExecute: " + icon);
-                    if(favorite){
-                        cityTemps.add(String.valueOf(tempCelsius) + "°C");
-                        weatherIcons.add(icon);
-                    }
-                    showWeatherIcon(icon);
-                }
+                cityNames.add(cityName);
+                cityTemps.add(String.valueOf(tempCelsius)+ " °C");
+                weatherIcons.add(icon);
                 Log.i(TAG, "onPostExecute: try: lämnar");
             }catch (Exception e){
                 Log.i(TAG, "onPostExecute: catch: start");
@@ -349,6 +299,7 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
     // Background thread to douwnload the weather information to the recyclerview
     public class DownloadCityListInformationTask extends AsyncTask<String, Void, String>{
         private static final String TAG = "DownloadCityListInforma";
+
         @Override
         protected String doInBackground(String... urls) {
             Log.d(TAG, "doInBackground: start");
@@ -417,8 +368,9 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
                 if (cityName != "" && String.valueOf(tempCelsius) != "" && desc != "") {
                     Log.i("Icon URL", "onPostExecute: " + icon);
                     if(favorite){
-                        cityTemps.add(String.valueOf(tempCelsius) + "°C");
-                        weatherIcons.add(icon);
+                        //cityNames.add(cityName);
+                        //cityTemps.add(String.valueOf(tempCelsius) + "°C");
+                        //weatherIcons.add(icon);
                     }
 
                 }
@@ -465,7 +417,7 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         String result = null;
         try {
             Log.i(TAG, "addCityToFavoritesDB: try: start");
-            result = task.execute("https://api.openweathermap.org/data/2.5/weather?lat="+latitude+"&lon="+longitude+"&appid="+"5ffcfd078c6933d6a3e7eb281727fa75").get();
+            result = task.execute("https://api.openweathermap.org/data/2.5/weather?lat="+strLatitude+"&lon="+strLongitude+"&appid="+"5ffcfd078c6933d6a3e7eb281727fa75").get();
             Log.i(TAG, "addCityToFavoritesDB: try: lämnar");
         } catch (ExecutionException e) {
             Log.i(TAG, "addCityToFavoritesDB: catch: start");
@@ -480,24 +432,62 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         Log.d(TAG, "addCityToFavoritesDB: lämnar");
     }
 
-    public void addCityToFavoritesSharedPrefs(ArrayList<String> cityNames){
-        saveCityArrayList(cityNames);
+    public void addCityToFavoritesSharedPrefs(){
+        if(cityNames == null || cityTemps == null || weatherIcons == null){
+            cityNames = new ArrayList<String>();
+            cityTemps = new ArrayList<String>();
+            weatherIcons = new ArrayList<String>();
+        }
+        cityNames.add(cityName);
+        cityTemps.add(String.valueOf(tempCelsius)+ " °C");
+        weatherIcons.add(icon);
+        saveArrayList(cityNames, "cityNames");
+        saveArrayList(cityTemps, "cityTemps");
+        saveArrayList(weatherIcons, "weatherIcons");
+        initializeFavoriteCityRecyclerView();
     }
 
-    public void saveCityArrayList(ArrayList<String> arrayList){
+    /*
+    * Save City information arrays to Sharedpreferences
+    * */
+    public void saveArrayList(ArrayList<String> arrayList, String key){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = prefs.edit();
         Gson gson = new Gson();
         String json = gson.toJson(arrayList);
-        editor.putString("cities",json);
+        editor.putString(key,json);
         editor.apply();
     }
-
-    public ArrayList<String> getArrayList(){
+    /*
+     * Get City information arrays from Sharedpreferences
+     * */
+    public ArrayList<String> getArrayList(String key){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         Gson gson = new Gson();
-        String json = prefs.getString("cities", null);
+        String json = prefs.getString(key, null);
         Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        return gson.fromJson(json, type);
+    }
+
+    /*
+     * Save City information arrays to Sharedpreferences
+     * */
+    public void saveUser(User user){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(user);
+        editor.putString("userLoggedIn",json);
+        editor.apply();
+    }
+    /*
+     * Get City information arrays from Sharedpreferences
+     * */
+    public User getUser(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Gson gson = new Gson();
+        String json = prefs.getString("userLoggedIn", null);
+        Type type = new TypeToken<User>() {}.getType();
         return gson.fromJson(json, type);
     }
 
@@ -564,6 +554,8 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
     public void userLogout(){
         Log.d(TAG, "userLogout: start");
         FirebaseAuth.getInstance().signOut();
+        User user = null;
+        saveUser(user);
         Intent intent = new Intent(this, LogInActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
@@ -584,7 +576,6 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         DownloadCityInformationTask task = new DownloadCityInformationTask();
         String result = null;
         try {
-            // cannot get the weather information when api_key and url is in resources
             result = task.execute("https://api.openweathermap.org/data/2.5/weather?q="+changeCityName+"&appid="+"5ffcfd078c6933d6a3e7eb281727fa75").get();
         } catch (ExecutionException e) {
             e.printStackTrace();
@@ -600,7 +591,7 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
     private void initializeFavoriteCityRecyclerView(){
         Log.d(TAG, "initializeFavoriteCityRecyclerView: starts");
         RecyclerView recyclerView = findViewById(R.id.favorite_cities_recycler_view);
-        adapter = new FavoriteCityRecyclerViewAdapter( cityNames, cityTemps, weatherIcons, this);
+        adapter = new FavoriteCityRecyclerViewAdapter(this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         Log.d(TAG, "initializeFavoriteCityRecyclerView: finish");

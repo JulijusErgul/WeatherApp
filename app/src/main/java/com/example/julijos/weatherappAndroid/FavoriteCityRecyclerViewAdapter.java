@@ -3,7 +3,9 @@ package com.example.julijos.weatherappAndroid;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
@@ -19,8 +21,11 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.squareup.picasso.Picasso;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -33,16 +38,21 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
     private ArrayList<String>cityTemps;
     private ArrayList<String>weatherIcons;
     private ImageView weatherIcon;
-
     private DatabaseReference databaseReference;
     private String firebaseAuthentication;
 
 
-    public FavoriteCityRecyclerViewAdapter(ArrayList<String> cityNames, ArrayList<String> cityTemps, ArrayList<String> weatherIcons,FragmentActivity context) {
-        this.cityNames = cityNames;
-        this.cityTemps = cityTemps;
-        this.weatherIcons = weatherIcons;
+    public FavoriteCityRecyclerViewAdapter(FragmentActivity context) {
         this.context = context;
+        if(getArrayList("cityNames") != null) {
+            cityNames = getArrayList("cityNames");
+            cityTemps = getArrayList("cityTemps");
+            weatherIcons = getArrayList("weatherIcons");
+        }else{
+            cityNames = new ArrayList<String>();
+            cityTemps = new ArrayList<String>();
+            weatherIcons = new ArrayList<String>();
+        }
     }
 
     @NonNull
@@ -56,10 +66,11 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder viewHolder, final int i) {
         Log.d(TAG, "onBindViewHolder: called");
-        viewHolder.cityName.setText(cityNames.get(i));
-        viewHolder.temperature.setText(cityTemps.get(i));
 
-        //Function to set the weather icon
+        if(cityNames.size() > 0) {
+            viewHolder.cityName.setText(cityNames.get(i));
+            viewHolder.temperature.setText(cityTemps.get(i));
+        }
         if(!weatherIcons.isEmpty()) {
             ArrayList<String> icons = new ArrayList<String>();
             icons.addAll(Arrays.asList("i01d", "i01n", "i02d", "i02n", "i03d", "i03n",
@@ -141,16 +152,36 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
         cityNames.remove(i);
         cityTemps.remove(i);
         weatherIcons.remove(i);
-        // måste spara dessa listor i shared prefs
+        saveArrayList(cityNames, "cityNames");
+        saveArrayList(cityTemps, "cityTemps");
+        saveArrayList(weatherIcons, "weatherIcons");
         Intent intent = new Intent(context, WeatherActivity.class);
         context.startActivity(intent);
     }
 
+    public void saveArrayList(ArrayList<String> arrayList, String key){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(arrayList);
+        editor.putString(key,json);
+        editor.apply();
+    }
 
+    public ArrayList<String> getArrayList(String key){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        Gson gson = new Gson();
+        String json = prefs.getString(key, null);
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        return gson.fromJson(json, type);
+    }
 
     @Override
     public int getItemCount() {
-        return cityNames.size();
+        if(cityNames != null)
+            return cityNames.size();
+        else
+            return 0;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

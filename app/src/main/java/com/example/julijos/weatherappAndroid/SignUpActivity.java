@@ -30,6 +30,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     private static final String PASSWORD_EMPTY = "Password is required";
     private static final String PASSWORD_SHORT = "Password must be atleat 6 charachters";
 
+    private User user;
+
     EditText registerEmail, registerPassword;
 
     private FirebaseAuth firebaseAuthentication;
@@ -39,6 +41,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
         Log.d(TAG, "onCreate: starts");
+
+        user = new User();
 
         registerEmail = (EditText) findViewById(R.id.editTextRegisterEmail) ;
         registerPassword = (EditText)findViewById(R.id.editTextRegisterPassword);
@@ -52,34 +56,34 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
     private void registerUser(){
         Log.d(TAG, "registerUser: starts");
-        final String email = registerEmail.getText().toString().trim();
-        String password = registerPassword.getText().toString().trim();
+        user.setEmail( registerEmail.getText().toString().trim());
+        user.setPassword(registerPassword.getText().toString().trim());
 
-        if (email.isEmpty()) {
+        user.setEmail(registerEmail.getText().toString().trim());
+        user.setPassword(registerPassword.getText().toString().trim());
+
+        if (user.validateEmailAndPassword() == 1) {
             registerEmail.setError(EMAIL_EMPTY);
             registerEmail.requestFocus();
             return;
         }
-
-        if(!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+        if(user.validateEmailAndPassword() == 2){
             registerEmail.setError(NOT_VALID_EMAIL);
             registerEmail.requestFocus();
             return;
         }
-
-        if(password.isEmpty()){
+        if(user.validateEmailAndPassword() == 3){
             registerPassword.setError(PASSWORD_EMPTY);
             registerPassword.requestFocus();
             return;
         }
-
-        if(password.length() < 6){
+        if(user.validateEmailAndPassword() == 4){
             registerPassword.setError(PASSWORD_SHORT);
             registerPassword.requestFocus();
             return;
         }
 
-        firebaseAuthentication.createUserWithEmailAndPassword(email, password)
+        firebaseAuthentication.createUserWithEmailAndPassword(user.getEmail(), user.getPassword())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
