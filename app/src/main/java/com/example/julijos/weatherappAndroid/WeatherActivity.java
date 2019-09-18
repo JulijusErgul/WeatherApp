@@ -78,6 +78,7 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
     private ArrayList<City> cityArrayList;
     String strLongitude, strLatitude;
 
+    // Initializes the action bar menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.d(TAG, "onCreateOptionsMenu: start");
@@ -97,6 +98,7 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         return super.onCreateOptionsMenu(menu);
     }
 
+    //creates menu option items for the actionbar menu
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "onOptionsItemSelected: start");
@@ -154,7 +156,6 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
             cityNames = getArrayList("cityNames");
             if(cityTemps != null) {
                 downloadDataFromCityNames();
-                initializeFavoriteCityRecyclerView();
             }else{
                 cityNames = new ArrayList<String>();
                 cityTemps = new ArrayList<String>();
@@ -167,12 +168,10 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
 
         //downloads the content for the main city that is shown in the activity
         downloadCityInformation();
-        //downloads the content for the recyclerview
-        downloadDataFromCityNames();
-
         Log.d(TAG, "onCreate: lämnar");
     }
 
+    // downloading data for the the users current location
     private void downloadCityInformation() {
         DownloadCityInformationTask task = new DownloadCityInformationTask();
         String result = null;
@@ -186,9 +185,7 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         Log.i(TAG,"Contents of URL " +  result);
     }
 
-
-
-
+    // downloading data for the cityNames Arraylist
     private void downloadDataFromCityNames() {
         if(cityNames != null){
             for(int i = 0; i < cityNames.size(); i++){
@@ -223,7 +220,7 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         Log.d(TAG, "removeSpecialCharacterFromCityName: lämnar");
     }
 
-    // Background thread to douwnload the weather information
+    // Background thread to download the weather information
     public class DownloadCityInformationTask extends AsyncTask<String, Void, String>{
         private static final String TAG = "DownloadCityInformation";
         @Override
@@ -283,10 +280,16 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
             super.onPostExecute(result);
             try {
                 Log.d(TAG, "onPostExecute: try: start");
-                cityNames.add(cityName);
+                /*cityNames.add(cityName);
                 cityTemps.add(String.valueOf(tempCelsius)+ " °C");
                 weatherIcons.add(icon);
+                */
+                textViewCity.setText(cityName);
+                textViewDesc.setText(desc);
+                textViewTemp.setText(String.valueOf(tempCelsius)+ " °C");
+                showWeatherIcon(icon);
                 Log.i(TAG, "onPostExecute: try: lämnar");
+
             }catch (Exception e){
                 Log.i(TAG, "onPostExecute: catch: start");
                 Log.i(TAG, "onPostExecute: catch: lämnar");
@@ -365,15 +368,6 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
 
             try {
 
-                if (cityName != "" && String.valueOf(tempCelsius) != "" && desc != "") {
-                    Log.i("Icon URL", "onPostExecute: " + icon);
-                    if(favorite){
-                        //cityNames.add(cityName);
-                        //cityTemps.add(String.valueOf(tempCelsius) + "°C");
-                        //weatherIcons.add(icon);
-                    }
-
-                }
             }catch (Exception e){
 
             }
@@ -432,6 +426,7 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
         Log.d(TAG, "addCityToFavoritesDB: lämnar");
     }
 
+    // adding new cities to sharedpreferences
     public void addCityToFavoritesSharedPrefs(){
         if(cityNames == null || cityTemps == null || weatherIcons == null){
             cityNames = new ArrayList<String>();
@@ -591,7 +586,11 @@ public class WeatherActivity extends AppCompatActivity implements AlertDialogCha
     private void initializeFavoriteCityRecyclerView(){
         Log.d(TAG, "initializeFavoriteCityRecyclerView: starts");
         RecyclerView recyclerView = findViewById(R.id.favorite_cities_recycler_view);
-        adapter = new FavoriteCityRecyclerViewAdapter(this);
+        if(FirebaseAuth.getInstance().getCurrentUser() == null) {
+            adapter = new FavoriteCityRecyclerViewAdapter(this);
+        }else{
+            adapter = new FavoriteCityRecyclerViewAdapter(this, cityNames, cityTemps, weatherIcons);
+        }
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         Log.d(TAG, "initializeFavoriteCityRecyclerView: finish");

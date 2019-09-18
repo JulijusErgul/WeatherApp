@@ -55,6 +55,13 @@ public class FavoriteCityRecyclerViewAdapter extends  RecyclerView.Adapter<Favor
         }
     }
 
+    public FavoriteCityRecyclerViewAdapter(FragmentActivity context, ArrayList<String> cityNames, ArrayList<String> cityTemps, ArrayList<String> weatherIcons) {
+        this.context = context;
+        this.cityNames = cityNames;
+        this.cityTemps = cityTemps;
+        this.weatherIcons = weatherIcons;
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
